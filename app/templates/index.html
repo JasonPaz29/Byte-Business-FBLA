@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Byte Business | Home{% endblock %}
+
+{% block content %}
+<div class="container">
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Ratings made simple</span>
+      <h1>A calm place to share quick ratings.</h1>
+      <p>Byte Business keeps feedback tidy so people can see what matters—clear scores, short notes, and zero noise.</p>
+      <div class="hero-actions">
+        <a class="button" href="{{ url_for('auth.register') }}">Create account</a>
+        <a class="button subtle" href="{{ url_for('auth.login') }}">Log in</a>
+        <span class="subtext">No ads. No clutter. Just signal.</span>
+      </div>
+      <div class="mini-grid" style="margin-top: 1.1rem;">
+        <div class="neutral-card">
+          <span class="stars">★★★★☆</span>
+          <span>Service quality</span>
+        </div>
+        <div class="neutral-card">
+          <span class="stars">★★★★★</span>
+          <span>Response speed</span>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="rating-card">
+        <span class="tag">Latest ratings</span>
+        <div class="row">
+          <div>
+            <div class="stars">★★★★★</div>
+            <p style="margin: 0;">"On-time updates and friendly check-ins."</p>
+          </div>
+          <span class="pill">Project support</span>
+        </div>
+        <div class="row">
+          <div>
+            <div class="stars">★★★★☆</div>
+            <p style="margin: 0;">"Clean deliverables, could iterate faster."</p>
+          </div>
+          <span class="pill">Design review</span>
+        </div>
+        <div class="row">
+          <div>
+            <div class="stars">★★★★★</div>
+            <p style="margin: 0;">"Clear communication and next steps."</p>
+          </div>
+          <span class="pill">Client call</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>What makes this different</h2>
+      <p>Built to feel like a casual scorecard with professional clarity.</p>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <h3>Quick scoring</h3>
+        <p>Drop a score and a short note—no long forms, no shouting into the void.</p>
+      </div>
+      <div class="card">
+        <h3>Neutral look</h3>
+        <p>A low-color layout that keeps attention on the ratings, not the interface.</p>
+      </div>
+      <div class="card">
+        <h3>Trustable flow</h3>
+        <p>Login and register are straightforward so people feel comfortable leaving honest takes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <h2>Recent highlights</h2>
+      <p>Examples of the tone and brevity we aim for.</p>
+    </div>
+    <div class="card-grid">
+      <div class="card">
+        <div class="row">
+          <h3 style="margin: 0;">Product handoff</h3>
+          <span class="stars">★★★★★</span>
+        </div>
+        <p>"Handed off clean files and answers in one email."</p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <h3 style="margin: 0;">Follow-up care</h3>
+          <span class="stars">★★★★☆</span>
+        </div>
+        <p>"Polite check-ins, could add more context on next steps."</p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <h3 style="margin: 0;">Support desk</h3>
+          <span class="stars">★★★★☆</span>
+        </div>
+        <p>"Fast replies, minor delays during weekends."</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div>
+      <h3>Ready to leave or collect ratings?</h3>
+      <p>Keep feedback concise and easy to skim.</p>
+    </div>
+    <div class="hero-actions">
+      <a class="button" href="{{ url_for('auth.register') }}">Create account</a>
+      <a class="button subtle" href="{{ url_for('auth.login') }}">Log in</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

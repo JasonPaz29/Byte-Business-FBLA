@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Your Bookmarks | Byte Business{% endblock %}
+
+{% block content %}
+<div class="container">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h2>Your bookmarks</h2>
+        <p>Jump back to places you saved.</p>
+      </div>
+      <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Browse businesses</a>
+    </div>
+
+    {% if bookmarks and bookmarks|length > 0 %}
+    <div class="card-grid">
+      {% for bookmark in bookmarks %}
+      {% set biz = bookmark.business %}
+      <div class="card business-card">
+        <div class="row" style="align-items: baseline;">
+          <h3 style="margin: 0;">{{ biz.name|default('Business name') }}</h3>
+          <span class="pill">{{ biz.category|default('Business') }}</span>
+        </div>
+        <p class="summary">{{ biz.description|default('No description yet.') }}</p>
+        <div class="business-meta">
+          <span class="muted">{{ biz.location|default('City, State') }}</span>
+          <span class="muted">{{ biz.address|default('Address not provided') }}</span>
+        </div>
+        <div class="row" style="margin-top: 0.4rem;">
+          <a class="button subtle" href="{{ url_for('main.business_detail', business_id=biz.id|default(0)) }}">View business</a>
+          <a href="{{ url_for('bookmarks.unbookmark', business_id=biz.id|default(0)) }}" class="muted">Remove</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+      <h3 style="margin-top: 0;">No bookmarks yet</h3>
+      <p style="margin: 0.35rem 0 0.8rem;">Save a business to come back to it quickly.</p>
+      <a class="button" href="{{ url_for('main.list_businesses') }}">Find businesses</a>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

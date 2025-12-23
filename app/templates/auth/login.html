@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Login | Byte Business{% endblock %}
+
+{% block content %}
+<div class="container auth-layout">
+  <div class="auth-card">
+    <h1>Welcome back</h1>
+    <p>Sign in to add ratings or check what people are saying.</p>
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div>
+        <label for="identifier">Username or Email</label>
+        <input id="identifier" name="identifier" type="text" placeholder="yourname or you@example.com" required>
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Enter your password" required>
+      </div>
+      <button class="button" type="submit">Log in</button>
+    </form>
+    <p class="muted" style="margin-top: 1rem;">New here? <a href="{{ url_for('auth.register') }}">Create an account</a>.</p>
+  </div>
+</div>
+{% endblock %}

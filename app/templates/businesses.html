@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Businesses | Byte Business{% endblock %}
+
+{% block content %}
+<div class="container">
+  <section class="section">
+    <div class="section-header">
+      <h2>Businesses</h2>
+      <p>Browse ratings and keep things sorted by what matters to you.</p>
+    </div>
+
+    <div class="toolbar">
+      <form method="get" class="inline">
+        <label for="sort">Sort by</label>
+        <select name="sort" id="sort">
+          <option value="rating_desc">Rating: high to low</option>
+          <option value="rating_asc">Rating: low to high</option>
+          <option value="name_asc">Name: A to Z</option>
+        </select>
+        <label for="type">Type</label>
+        <select name="type" id="type">
+          <option value="">All types</option>
+          <option value="Cafe">Cafe</option>
+          <option value="Restaurant">Restaurant</option>
+          <option value="Bookstore">Bookstore</option>
+          <option value="Retail">Retail</option>
+          <option value="Service">Service</option>
+          <option value="Studio">Studio</option>
+          <option value="Gym">Gym</option>
+        </select>
+        <button class="button subtle" type="submit">Apply</button>
+      </form>
+    </div>
+
+    <div class="card-grid" id="business-grid">
+      {% set sample_businesses = [
+        {'id': 1, 'name': 'North Street Cafe', 'type': 'Cafe', 'rating': '4.7', 'stars': '★★★★★', 'reviews': 128, 'location': 'Seattle, WA', 'summary': 'Calm atmosphere, great pour-over coffee, reliable Wi-Fi.', 'updated': 'today', 'deals_count': 2},
+        {'id': 2, 'name': 'Harbor & Co.', 'type': 'Retail', 'rating': '4.5', 'stars': '★★★★☆', 'reviews': 96, 'location': 'Portland, OR', 'summary': 'Thoughtful home goods with quick in-store pickup.', 'updated': 'this week', 'deals_count': 1},
+        {'id': 3, 'name': 'Riverstone Studio', 'type': 'Studio', 'rating': '4.8', 'stars': '★★★★★', 'reviews': 142, 'location': 'Austin, TX', 'summary': 'Friendly creative team with on-time project handoffs.', 'updated': '2 days ago', 'deals_count': 0},
+        {'id': 4, 'name': 'Clarity Support', 'type': 'Service', 'rating': '4.6', 'stars': '★★★★☆', 'reviews': 210, 'location': 'Remote', 'summary': 'Fast responses, organized notes, consistent follow-up.', 'updated': 'yesterday', 'deals_count': 0}
+      ] %}
+      {% set items = businesses if businesses is defined and businesses else sample_businesses %}
+
+      {% for biz in items %}
+      {% set biz_type = biz.category|default(biz.type|default('Type')) %}
+      {% set rating_val = biz.average_rating() if (biz.average_rating is defined and biz.average_rating() is not none) else biz.rating|default('0') %}
+      {% set deals_count = (biz.deals|length) if (biz.deals is not none) else biz.deals_count|default(0) %}
+      <div class="card business-card" data-biz-card data-type="{{ biz_type }}" data-rating="{{ rating_val }}" data-name="{{ biz.name }}">
+        <div class="row">
+          <h3>{{ biz.name }}</h3>
+          <span class="pill">{{ rating_val if rating_val else '4.5' }} avg</span>
+        </div>
+        <div class="business-meta">
+          <span class="star-bar" data-rating-bar data-rating="{{ rating_val }}">
+            <span class="base">★★★★★</span>
+            <span class="fill">★★★★★</span>
+          </span>
+          <span class="badge">{{ biz_type }}</span>
+          {% if deals_count > 0 %}
+          <span class="badge accent">{{ deals_count }} deal{{ 's' if deals_count != 1 else '' }}</span>
+          {% endif %}
+          <span>{{ biz.location|default('City, State') }}</span>
+        </div>
+        <p class="muted summary">{{ biz.description|default(biz.summary|default('Concise notes about the experience go here.')) }}</p>
+        <div class="row" style="gap: 0.5rem;">
+          <a class="button subtle" href="{{ url_for('main.business_detail', business_id=biz.id|default(loop.index)) }}">View details</a>
+          <span class="muted">{{ biz.reviews|length if biz.reviews is not none else '—' }} reviews • Updated {{ biz.updated|default('recently') }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('business-grid');
+    if (!grid) return;
+
+    const cards = Array.from(grid.querySelectorAll('[data-biz-card]'));
+    const sortSelect = document.getElementById('sort');
+    const typeSelect = document.getElementById('type');
+    const form = grid.closest('.container').querySelector('form');
+
+    if (form) {
+      form.addEventListener('submit', (e) => e.preventDefault());
+    }
+
+    function applyFilters() {
+      const typeFilter = (typeSelect?.value || '').toLowerCase();
+      let visibleCards = cards.filter(card => {
+        if (!typeFilter) return true;
+        return (card.dataset.type || '').toLowerCase() === typeFilter;
+      });
+
+      const sortValue = sortSelect?.value || 'rating_desc';
+      visibleCards.sort((a, b) => {
+        const nameA = (a.dataset.name || '').toLowerCase();
+        const nameB = (b.dataset.name || '').toLowerCase();
+        const ratingA = parseFloat(a.dataset.rating || '0') || 0;
+        const ratingB = parseFloat(b.dataset.rating || '0') || 0;
+        if (sortValue === 'name_asc') {
+          return nameA.localeCompare(nameB);
+        }
+        if (sortValue === 'rating_asc') {
+          return ratingA - ratingB;
+        }
+        return ratingB - ratingA; // default rating_desc
+      });
+
+      cards.forEach(card => { card.style.display = 'none'; });
+      visibleCards.forEach(card => { card.style.display = ''; grid.appendChild(card); });
+    }
+
+    sortSelect?.addEventListener('change', applyFilters);
+    typeSelect?.addEventListener('change', applyFilters);
+    applyFilters();
+  });
+</script>
+{% endblock %}

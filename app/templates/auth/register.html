@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Register | Byte Business{% endblock %}
+
+{% set turnstile_site_key = config.get('TURNSTILE_SITE_KEY', '') %}
+
+{% block head %}
+  {{ super() }}
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('[data-register-form]');
+      const tokenInput = document.getElementById('cf-turnstile-response');
+      const submitBtn = form?.querySelector('[data-submit]');
+      const widget = document.querySelector('.cf-turnstile');
+      const hasSiteKey = widget && widget.dataset.sitekey;
+
+      const updateSubmitState = () => {
+        if (!submitBtn) return;
+        const hasToken = tokenInput && tokenInput.value;
+        submitBtn.disabled = !hasToken;
+        submitBtn.textContent = hasToken ? 'Register' : 'Complete verification';
+      };
+
+      if (!hasSiteKey) {
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Verification unavailable';
+        }
+        return;
+      }
+
+      window.handleTurnstile = (token) => {
+        if (tokenInput) tokenInput.value = token;
+        updateSubmitState();
+      };
+
+      window.handleTurnstileExpired = () => {
+        if (tokenInput) tokenInput.value = '';
+        updateSubmitState();
+      };
+
+      window.handleTurnstileError = () => {
+        if (tokenInput) tokenInput.value = '';
+        updateSubmitState();
+      };
+
+      form?.addEventListener('submit', (event) => {
+        if (!tokenInput || !tokenInput.value) {
+          event.preventDefault();
+          updateSubmitState();
+        }
+      });
+
+      updateSubmitState();
+    });
+  </script>
+{% endblock %}
+
+{% block content %}
+<div class="container auth-layout">
+  <div class="auth-card">
+    <h1>Create your account</h1>
+    <p>Join to share quick ratings and keep notes in one calm place.</p>
+    <form method="POST" action="{{ url_for('auth.register') }}" data-register-form>
+      
+      <div>
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" placeholder="Your username" required>
+      </div>
+      <div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required>
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" placeholder="Create a password" required>
+      </div>
+      <div>
+        <label>Verification</label>
+        <div
+          class="cf-turnstile"
+          data-sitekey="{{ turnstile_site_key }}"
+          data-theme="light"
+          data-callback="handleTurnstile"
+          data-expired-callback="handleTurnstileExpired"
+          data-error-callback="handleTurnstileError"
+        ></div>
+        {% if not turnstile_site_key %}
+        <p class="muted" style="margin: 0.35rem 0 0;">Turnstile site key missing. Add <code>TURNSTILE_SITE_KEY</code> to your config/env to enable verification.</p>
+        {% endif %}
+        <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">
+      </div>
+      <button class="button" type="submit" data-submit>Register</button>
+    </form>
+    <p class="muted" style="margin-top: 1rem;">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>.</p>
+  </div>
+</div>
+{% endblock %}

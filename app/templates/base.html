@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Byte Business{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">Byte Business</div>
+      <nav class="nav-links">
+        <a href="{{ url_for('main.home') }}">Home</a>
+        <a href="/businesses">Businesses</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('bookmarks.view_bookmarks') }}">Bookmarks</a>
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('auth.login') }}">Login</a>
+        <a class="button subtle" href="{{ url_for('auth.register') }}">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-stack">
+            {% for category, message in messages %}
+              <div class="alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <span>&copy; Jason Paz-Romero</span>
+    </div>
+  </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('[data-rating-bar]').forEach((bar) => {
+        const fill = bar.querySelector('.fill');
+        const rating = Math.max(0, Math.min(5, parseFloat(bar.dataset.rating) || 0));
+        if (fill) {
+          fill.style.width = `${rating * 20}%`;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

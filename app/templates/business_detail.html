@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Business Detail | Byte Business{% endblock %}
+
+{% block content %}
+{% set sample_business = {
+  'name': 'North Street Cafe',
+  'type': 'Cafe',
+  'rating': '4.7',
+  'stars': '★★★★★',
+  'reviews': 128,
+  'location': 'Seattle, WA',
+  'summary': 'Relaxed spot with reliable Wi-Fi, calm music, and attentive staff. Great for casual meetups or getting work done.',
+  'categories': ['Coffee', 'Bakery', 'Workspace-friendly'],
+  'hours': '8:00 AM – 6:00 PM',
+  'contact': '(206) 555-0199',
+  'website': 'northstreetcafe.example.com',
+  'address': '412 North Street, Seattle, WA',
+  'recent_note': '"Friendly service, easy to find a seat, and the espresso is consistent."',
+  'bookmarks': [],
+  'deals': [
+    {'id': 1, 'title': 'Free pastry with any drink', 'description': 'Show this deal at checkout to get a complimentary pastry with any drink purchase.', 'start_date': 'Today', 'end_date': 'Sep 30', 'redeemed_deals': []},
+    {'id': 2, 'title': '20% off weekday lunch', 'description': 'Valid Monday–Thursday from 11am–2pm. Applies to dine-in orders.', 'start_date': 'Today', 'end_date': 'Oct 15', 'redeemed_deals': []},
+  ]
+} %}
+{% set biz = business if business is defined and business else sample_business %}
+{% set sample_reviews = [
+  {'id': 1, 'user_id': 1, 'user': {'username': 'Alex M.'}, 'rating': 5, 'comment': 'Friendly staff and quick service.', 'date': 'Today'},
+  {'id': 2, 'user_id': 2, 'user': {'username': 'Taylor R.'}, 'rating': 4, 'comment': 'Great spot to work, can get busy in the afternoons.', 'date': 'Yesterday'}
+] %}
+{% set review_items = reviews if reviews is defined and reviews else sample_reviews %}
+{% set bookmarks_for_biz = biz.bookmarks if biz.bookmarks is not none else [] %}
+{% set is_bookmarked = current_user.is_authenticated and (bookmarks_for_biz | selectattr('user_id', 'equalto', current_user.id) | list | length > 0) %}
+{% set deals_list = biz.deals if (biz.deals is defined and biz.deals|length > 0) else (sample_business.deals if (biz.id is not defined or not biz.id) else []) %}
+
+<div class="container">
+  <section class="section">
+    <div class="card card-with-ribbon">
+      <a
+        class="bookmark-ribbon"
+        href="{{ url_for('bookmarks.unbookmark', business_id=biz.id|default(0)) if is_bookmarked else url_for('bookmarks.bookmark', business_id=biz.id|default(0)) }}"
+        aria-label="{{ 'Remove' if is_bookmarked else 'Add' }} {{ biz.name|default('this business') }} {{ 'from' if is_bookmarked else 'to' }} bookmarks"
+      >
+        <span class="ribbon-label">{{ 'Remove bookmark' if is_bookmarked else 'Add to bookmark' }}</span>
+      </a>
+      <div class="row" style="align-items: flex-start;">
+        <div>
+          <span class="eyebrow">{{ biz.type|default('Business') }}</span>
+          <h1 style="margin: 0.4rem 0 0.3rem;">{{ biz.name|default('Business name') }}</h1>
+          <div class="business-meta">
+            {% set headline_rating = biz.average_rating()|default(biz.rating|default('0')) %}
+            <span class="star-bar" data-rating-bar data-rating="{{ headline_rating }}">
+              <span class="base">★★★★★</span>
+              <span class="fill">★★★★★</span>
+            </span>
+            <span>{{ biz.average_rating()|default('4.5') }} average • {{ biz.reviews|length if biz.reviews is not none else '—' }} rating(s)</span>
+            <span class="pill">{{ biz.location|default('City, State') }}</span>
+          </div>
+        </div>
+        <div class="stat">
+          <strong>{{ biz.average_rating()|default('4.5') }}</strong>
+          <span class="muted">Overall rating</span>
+        </div>
+      </div>
+      <p style="margin: 0.8rem 0 1rem; color: var(--muted);">{{ biz.description|default('Concise description goes here.') }}</p>
+      <div class="inline">
+        {% for tag in biz.categories|default([]) %}
+        <span class="badge">{{ tag }}</span>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="grid-two" style="margin-top: 1rem;">
+      <div class="card">
+        <h3 style="margin-top: 0;">Details</h3>
+        <div class="info-grid">
+          <div class="stat">
+            <span class="muted">Hours</span>
+            <strong>{{ biz.hours|default('—') }}</strong>
+          </div>
+          <div class="stat">
+            <span class="muted">Contact</span>
+            <strong>{{ biz.contact|default('—') }}</strong>
+          </div>
+          <div class="stat">
+            <span class="muted">Website</span>
+            <strong>{{ biz.website|default('—') }}</strong>
+          </div>
+          <div class="stat">
+            <span class="muted">Address</span>
+            <strong>{{ biz.address|default('—') }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top: 0;">Rating snapshot</h3>
+        <div class="grid-two">
+          <div class="stat">
+            <span class="muted">Service</span>
+            <strong>{{ biz.service_rating|default('4.8') }}</strong>
+          </div>
+          <div class="stat">
+            <span class="muted">Quality</span>
+            <strong>{{ biz.quality_rating|default('4.6') }}</strong>
+          </div>
+          <div class="stat">
+            <span class="muted">Atmosphere</span>
+            <strong>{{ biz.atmosphere_rating|default('4.7') }}</strong>
+          </div>
+          <div class="stat">
+            <span class="muted">Value</span>
+            <strong>{{ biz.value_rating|default('4.5') }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 1rem;">
+      <h3 style="margin-top: 0;">Recent note</h3>
+      <div class="note">
+        {{ biz.recent_note|default('No notes yet. Be the first to leave feedback.') }}
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 1rem;">
+      <div class="row" style="align-items: baseline;">
+        <h3 style="margin: 0;">Deals</h3>
+        <span class="pill">{{ deals_list|length }} available</span>
+      </div>
+      {% if deals_list and deals_list|length > 0 %}
+      <div class="deal-stack">
+        {% for deal in deals_list %}
+        {% set redeemed_list = deal.redeemed_deals if deal.redeemed_deals is not none else [] %}
+        {% set already_redeemed = current_user.is_authenticated and (redeemed_list | selectattr('user_id', 'equalto', current_user.id) | list | length > 0) %}
+        <div class="deal-card">
+          <div class="row" style="align-items: baseline;">
+            <h4 style="margin: 0;">{{ deal.title|default('Limited offer') }}</h4>
+            {% if already_redeemed %}
+            <span class="pill success">Redeemed</span>
+            {% endif %}
+          </div>
+          <p class="muted" style="margin: 0;">{{ deal.description|default('Deal details coming soon.') }}</p>
+          <div class="deal-meta">
+            <span>Starts: {{ deal.start_date|default('Now') }}</span>
+            <span>Ends: {{ deal.end_date|default('Soon') }}</span>
+          </div>
+          <div class="deal-actions">
+            <form method="POST" action="{{ url_for('deal.redeem_deal', business_id=biz.id|default(0), deal_id=deal.id|default(0)) }}">
+              <button class="button" type="submit" {% if already_redeemed %}disabled{% endif %}>{{ 'Already redeemed' if already_redeemed else 'Redeem deal' }}</button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="muted" style="margin: 0.2rem 0 0;">No deals posted for this business yet.</p>
+      {% endif %}
+    </div>
+
+    <div class="grid-two" style="margin-top: 1rem;">
+      <div class="card">
+        <h3 style="margin-top: 0;">Reviews</h3>
+        <div class="review-list">
+          {% for review in review_items %}
+          {% set rating_value = review.rating|int if review.rating is defined else 5 %}
+          {% set can_edit_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
+          <div class="review-item">
+            <div class="row" style="align-items: baseline;">
+              <strong>{{ review.user.username|default('Anonymous') }}</strong>
+              <span class="star-bar" data-rating-bar data-rating="{{ rating_value }}">
+                <span class="base">★★★★★</span>
+                <span class="fill">★★★★★</span>
+              </span>
+              <span class="muted">{{ review.date|default('Recent') }}</span>
+              {% if can_edit_review %}
+              <a class="muted" href="{{ url_for('main.edit_review', review_id=review.id|default(0)) }}">Edit review</a>
+              {% endif %}
+            </div>
+            <p class="muted" style="margin: 0.25rem 0 0;">{{ review.comment|default('No comment provided.') }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top: 0;">Leave a review</h3>
+        <form method="POST" action="{{ url_for('main.submit_review', business_id=biz.id|default(0)) }}">
+          <div>
+            <label for="rating">Rating</label>
+            <select id="rating" name="rating" required>
+              <option value="">Select</option>
+              <option value="5">5 - Excellent</option>
+              <option value="4">4 - Good</option>
+              <option value="3">3 - Fair</option>
+              <option value="2">2 - Poor</option>
+              <option value="1">1 - Very poor</option>
+            </select>
+          </div>
+          <div>
+            <label for="comment">Comment</label>
+            <textarea id="comment" name="comment" rows="3" placeholder="Share a short note (optional)" style="width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: #f9fafb; color: var(--text);"></textarea>
+          </div>
+          <button class="button" type="submit">Submit review</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
