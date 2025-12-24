@@ -1,0 +1,27 @@
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables (VERY IMPORTANT)
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Flask / instance data
+instance/
+
+# SQLite database
+*.db
+*.sqlite3
+
+# Migrations cache (keep versions, ignore pycache)
+migrations/**/__pycache__/
+
+# macOS junk
+.DS_Store
+
+# IDE configs
+.vscode/
+.idea/
