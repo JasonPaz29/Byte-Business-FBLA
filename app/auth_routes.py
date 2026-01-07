@@ -7,11 +7,9 @@ from sqlalchemy import or_
 from flask_login import login_user, logout_user, login_required, current_user
 from .security import verify_turnstile
 from .verify_user import generate_email_token, verify_email_token
+from .profanity_check import contains_profanity
 
 auth_bp = Blueprint('auth', __name__)
-
-
-#TODO Implement remember me functionality, password reset with email, email verification, and 2FA
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -55,10 +53,14 @@ def register():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-
+        
         existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
         if existing_user:
             flash("Username or email already exists.", "danger")
+            return redirect(url_for('auth.register'))
+        
+        if contains_profanity(username):
+            flash("Username contains inappropriate language. Please choose another.", "danger")
             return redirect(url_for('auth.register'))
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')

@@ -9,7 +9,12 @@
         <h2>Your bookmarks</h2>
         <p>Jump back to places you saved.</p>
       </div>
-      <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Browse businesses</a>
+      <div class="inline" style="gap: 0.5rem;">
+        <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Browse businesses</a>
+        {% if bookmarks and bookmarks|length > 0 %}
+        <a class="button" href="{{ url_for('bookmarks.generate_report') }}">Download PDF</a>
+        {% endif %}
+      </div>
     </div>
 
     {% if bookmarks and bookmarks|length > 0 %}

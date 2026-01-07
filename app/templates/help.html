@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Help | Byte Business{% endblock %}
+
+{% block content %}
+<div class="container">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h2>Help center</h2>
+        <p>Quick guidance for ratings, bookmarks, and deals.</p>
+      </div>
+      <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Browse businesses</a>
+    </div>
+
+    <div class="grid-two">
+      <div class="card">
+        <h3>Rate a business</h3>
+        <ul class="list">
+          <li>Open a business detail page from the Businesses list.</li>
+          <li>Choose a rating from 1-5 and add a short comment if you want.</li>
+          <li>Submit your review (email verification is required).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Edit or remove your review</h3>
+        <ul class="list">
+          <li>Find your review on the business detail page.</li>
+          <li>Use the "Edit review" link to update your rating or comment.</li>
+          <li>Changes show up right away after saving.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-two" style="margin-top: 1rem;">
+      <div class="card">
+        <h3>Use bookmarks</h3>
+        <ul class="list">
+          <li>Click the ribbon on a business page to add or remove a bookmark.</li>
+          <li>Visit Bookmarks in the navigation to see your saved businesses.</li>
+          <li>Select “View business” to jump back to details quickly.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Download bookmark reports</h3>
+        <ul class="list">
+          <li>Open your Bookmarks page.</li>
+          <li>Choose "Download PDF" to export your saved list.</li>
+          <li>Use the report for offline notes or sharing.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-two" style="margin-top: 1rem;">
+      <div class="card">
+        <h3>Search and filter businesses</h3>
+        <ul class="list">
+          <li>Use the search bar to find a business by name or location.</li>
+          <li>Filter by type to narrow the list.</li>
+          <li>Sort by rating or name for faster browsing.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Redeem deals</h3>
+        <ul class="list">
+          <li>Open a business detail page and find the Deals section.</li>
+          <li>Press "Redeem deal" to claim an offer.</li>
+          <li>Redeemed deals show as completed on the page.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 1rem;">
+      <h3>Need more help?</h3>
+      <p class="muted">If something does not look right, log out and back in, then try again. You can also reach out to the site admin for support.</p>
+    </div>
+  </section>
+</div>
+{% endblock %}

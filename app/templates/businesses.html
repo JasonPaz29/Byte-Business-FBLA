@@ -9,8 +9,49 @@
       <p>Browse ratings and keep things sorted by what matters to you.</p>
     </div>
 
+    {% set recommended_items = recommended if recommended is defined and recommended else [] %}
+    {% if recommended_items and recommended_items|length > 0 %}
+    <div class="section-header" style="margin-top: 1.2rem;">
+      <div>
+        <h2>Recommended for you</h2>
+        <p>Based on your bookmarks, ratings, and available deals.</p>
+      </div>
+    </div>
+    <div class="card-grid" style="margin-bottom: 1.4rem;">
+      {% for biz in recommended_items %}
+      {% set biz_type = biz.category|default(biz.type|default('Type')) %}
+      {% set rating_val = biz.average_rating() if (biz.average_rating is defined and biz.average_rating() is not none) else biz.rating|default('0') %}
+      {% set deals_count = (biz.deals|length) if (biz.deals is not none) else biz.deals_count|default(0) %}
+      <div class="card business-card">
+        <div class="row">
+          <h3>{{ biz.name }}</h3>
+          <span class="pill">{{ rating_val if rating_val else '4.5' }} avg</span>
+        </div>
+        <div class="business-meta">
+          <span class="star-bar" data-rating-bar data-rating="{{ rating_val }}">
+            <span class="base">★★★★★</span>
+            <span class="fill">★★★★★</span>
+          </span>
+          <span class="badge">{{ biz_type }}</span>
+          {% if deals_count > 0 %}
+          <span class="badge accent">{{ deals_count }} deal{{ 's' if deals_count != 1 else '' }}</span>
+          {% endif %}
+          <span>{{ biz.location|default('City, State') }}</span>
+        </div>
+        <p class="muted summary">{{ biz.description|default('Concise notes about the experience go here.') }}</p>
+        <div class="row" style="gap: 0.5rem;">
+          <a class="button subtle" href="{{ url_for('main.business_detail', business_id=biz.id|default(loop.index)) }}">View details</a>
+          <span class="muted">{{ biz.reviews|length if biz.reviews is not none else '—' }} reviews</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="toolbar">
       <form method="get" class="inline">
+        <label for="search">Search</label>
+        <input id="search" name="q" type="search" placeholder="Search businesses" aria-label="Search businesses">
         <label for="sort">Sort by</label>
         <select name="sort" id="sort">
           <option value="rating_desc">Rating: high to low</option>
@@ -20,15 +61,17 @@
         <label for="type">Type</label>
         <select name="type" id="type">
           <option value="">All types</option>
-          <option value="Cafe">Cafe</option>
           <option value="Restaurant">Restaurant</option>
-          <option value="Bookstore">Bookstore</option>
+          <option value="Cafe &amp; Bakery">Cafe &amp; Bakery</option>
+          <option value="Bar &amp; Nightlife">Bar &amp; Nightlife</option>
           <option value="Retail">Retail</option>
           <option value="Service">Service</option>
           <option value="Studio">Studio</option>
-          <option value="Gym">Gym</option>
+          <option value="Fitness">Fitness</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Bookstore">Bookstore</option>
+          <option value="Other">Other</option>
         </select>
-        <button class="button subtle" type="submit">Apply</button>
       </form>
     </div>
 
@@ -45,7 +88,7 @@
       {% set biz_type = biz.category|default(biz.type|default('Type')) %}
       {% set rating_val = biz.average_rating() if (biz.average_rating is defined and biz.average_rating() is not none) else biz.rating|default('0') %}
       {% set deals_count = (biz.deals|length) if (biz.deals is not none) else biz.deals_count|default(0) %}
-      <div class="card business-card" data-biz-card data-type="{{ biz_type }}" data-rating="{{ rating_val }}" data-name="{{ biz.name }}">
+      <div class="card business-card" data-biz-card data-type="{{ biz_type }}" data-type-raw="{{ biz_type }}" data-rating="{{ rating_val }}" data-name="{{ biz.name }}" data-location="{{ biz.location|default('') }}">
         <div class="row">
           <h3>{{ biz.name }}</h3>
           <span class="pill">{{ rating_val if rating_val else '4.5' }} avg</span>
@@ -55,7 +98,7 @@
             <span class="base">★★★★★</span>
             <span class="fill">★★★★★</span>
           </span>
-          <span class="badge">{{ biz_type }}</span>
+          <span class="badge" data-type-label>{{ biz_type }}</span>
           {% if deals_count > 0 %}
           <span class="badge accent">{{ deals_count }} deal{{ 's' if deals_count != 1 else '' }}</span>
           {% endif %}
@@ -71,7 +114,7 @@
     </div>
   </section>
 </div>
-<script>
+  <script>
   document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('business-grid');
     if (!grid) return;
@@ -79,17 +122,55 @@
     const cards = Array.from(grid.querySelectorAll('[data-biz-card]'));
     const sortSelect = document.getElementById('sort');
     const typeSelect = document.getElementById('type');
-    const form = grid.closest('.container').querySelector('form');
+    const searchInput = document.getElementById('search');
+    const form = grid.closest('.container')?.querySelector('form');
 
     if (form) {
       form.addEventListener('submit', (e) => e.preventDefault());
     }
 
+    const normalizeType = (rawType) => {
+      const value = (rawType || '').toLowerCase().trim();
+      if (!value || value === 'type') return 'Other';
+      if (/(book|bookstore|books)/.test(value)) return 'Bookstore';
+      if (/(cafe|coffee|bakery|tea|espresso)/.test(value)) return 'Cafe & Bakery';
+      if (/(bar|pub|taproom|brewery|cocktail|nightlife|lounge)/.test(value)) return 'Bar & Nightlife';
+      if (/(gym|fitness|yoga|pilates|wellness)/.test(value)) return 'Fitness';
+      if (/(studio|creative|design|photo|photography)/.test(value)) return 'Studio';
+      if (/(entertainment|arcade|theater|theatre|music|venue)/.test(value)) return 'Entertainment';
+      if (/(service|consulting|agency|support|repair|auto|cleaning|salon|spa)/.test(value)) return 'Service';
+      if (/(retail|store|shop|boutique|market)/.test(value)) return 'Retail';
+      if (/(restaurant|diner|bistro|grill|steak|sushi|ramen|pizza|pizzeria|taqueria|taco|bbq|barbecue|noodle|eatery|fast food|food truck)/.test(value)) {
+        return 'Restaurant';
+      }
+      return value.replace(/\b\w/g, (match) => match.toUpperCase());
+    };
+
+    cards.forEach((card) => {
+      const rawType = card.dataset.typeRaw || card.dataset.type || '';
+      const normalized = normalizeType(rawType);
+      card.dataset.type = normalized;
+      const label = card.querySelector('[data-type-label]');
+      if (label) label.textContent = normalized;
+    });
+
     function applyFilters() {
       const typeFilter = (typeSelect?.value || '').toLowerCase();
+      const searchQuery = (searchInput?.value || '').toLowerCase().trim();
       let visibleCards = cards.filter(card => {
-        if (!typeFilter) return true;
-        return (card.dataset.type || '').toLowerCase() === typeFilter;
+        if (typeFilter && (card.dataset.type || '').toLowerCase() !== typeFilter) {
+          return false;
+        }
+        if (searchQuery) {
+          const haystack = [
+            card.dataset.name || '',
+            card.dataset.location || '',
+            card.dataset.type || '',
+            card.dataset.typeRaw || ''
+          ].join(' ').toLowerCase();
+          return haystack.includes(searchQuery);
+        }
+        return true;
       });
 
       const sortValue = sortSelect?.value || 'rating_desc';
@@ -98,22 +179,22 @@
         const nameB = (b.dataset.name || '').toLowerCase();
         const ratingA = parseFloat(a.dataset.rating || '0') || 0;
         const ratingB = parseFloat(b.dataset.rating || '0') || 0;
-        if (sortValue === 'name_asc') {
-          return nameA.localeCompare(nameB);
-        }
-        if (sortValue === 'rating_asc') {
-          return ratingA - ratingB;
-        }
+
+        if (sortValue === 'name_asc') return nameA.localeCompare(nameB);
+        if (sortValue === 'rating_asc') return ratingA - ratingB;
         return ratingB - ratingA; // default rating_desc
       });
 
+      // hide all, then show filtered, and re-append in sorted order
       cards.forEach(card => { card.style.display = 'none'; });
       visibleCards.forEach(card => { card.style.display = ''; grid.appendChild(card); });
     }
 
     sortSelect?.addEventListener('change', applyFilters);
     typeSelect?.addEventListener('change', applyFilters);
+    searchInput?.addEventListener('input', applyFilters);
     applyFilters();
   });
-</script>
+  </script>
+
 {% endblock %}

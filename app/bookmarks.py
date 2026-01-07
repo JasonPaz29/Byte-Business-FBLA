@@ -1,6 +1,7 @@
-from flask import Blueprint, redirect, render_template, url_for
+from flask import Blueprint, redirect, render_template, url_for, send_file
 from flask_login import login_required, current_user
 from app.bookmark_services import add_bookmark, remove_bookmark
+from app.generate_pdf import generate_bookmark_report
 
 bp = Blueprint("bookmarks", __name__)
 
@@ -22,3 +23,15 @@ def unbookmark(business_id):
 def view_bookmarks():
     bookmarks = current_user.bookmarks
     return render_template("bookmarks.html", bookmarks=bookmarks)
+
+@bp.route("/bookmarks/report.pdf")
+@login_required
+def generate_report():
+    bookmarks = current_user.bookmarks
+    pdf_path = generate_bookmark_report(current_user, bookmarks)
+    return send_file(
+        pdf_path,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name="byte_business_bookmarks_report.pdf"
+    )

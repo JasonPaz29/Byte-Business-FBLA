@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Byte Business{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='FBLA-Symbol.png') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   {% block head %}{% endblock %}
 </head>
@@ -12,12 +13,21 @@
     <div class="container header-inner">
       <div class="brand">Byte Business</div>
       <nav class="nav-links">
+        {% if current_user.is_authenticated %}
+        <a href="/businesses">Businesses</a>
+        <a href="{{ url_for('bookmarks.view_bookmarks') }}">Bookmarks</a>
+        <a href="{{ url_for('main.reviews') }}">Reviews</a>
+        <a href="{{ url_for('main.help') }}">Help</a>
+        <div class="nav-right">
+          <span class="nav-user">
+            <span class="nav-user-label">Signed in as</span>
+            <span class="nav-user-name">{{ current_user.username }}</span>
+          </span>
+          <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+        {% else %}
         <a href="{{ url_for('main.home') }}">Home</a>
         <a href="/businesses">Businesses</a>
-        {% if current_user.is_authenticated %}
-        <a href="{{ url_for('bookmarks.view_bookmarks') }}">Bookmarks</a>
-        <a href="{{ url_for('auth.logout') }}">Logout</a>
-        {% else %}
         <a href="{{ url_for('auth.login') }}">Login</a>
         <a class="button subtle" href="{{ url_for('auth.register') }}">Register</a>
         {% endif %}
@@ -40,6 +50,48 @@
     {% block content %}{% endblock %}
   </main>
 
+  <div class="onboarding" data-onboarding hidden>
+    <div class="onboarding-backdrop" data-onboarding-close></div>
+    <div class="onboarding-card" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+      <div class="onboarding-progress" aria-hidden="true">
+        <span class="onboarding-dot is-active" data-dot></span>
+        <span class="onboarding-dot" data-dot></span>
+        <span class="onboarding-dot" data-dot></span>
+      </div>
+      <div class="onboarding-slide is-active" data-slide="0">
+        <h2 id="onboarding-title">Welcome to Byte Business</h2>
+        <p class="muted">Find great local businesses and keep quick notes in one place.</p>
+        <ul class="list">
+          <li>Browse businesses and open details.</li>
+          <li>Save favorites with the bookmark ribbon.</li>
+        </ul>
+      </div>
+      <div class="onboarding-slide" data-slide="1">
+        <h2>Rate in seconds</h2>
+        <p class="muted">Share a 1-5 rating and a short note to help others.</p>
+        <ul class="list">
+          <li>Open a business detail page.</li>
+          <li>Submit a review from the form.</li>
+        </ul>
+      </div>
+      <div class="onboarding-slide" data-slide="2">
+        <h2>Use bookmarks and deals</h2>
+        <p class="muted">Jump back to saved places and redeem offers.</p>
+        <ul class="list">
+          <li>See bookmarks from the nav.</li>
+          <li>Download a PDF report anytime.</li>
+        </ul>
+      </div>
+      <div class="onboarding-actions">
+        <button class="button subtle" type="button" data-skip>Skip</button>
+        <div class="onboarding-nav">
+          <button class="button subtle" type="button" data-back disabled>Back</button>
+          <button class="button" type="button" data-next>Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     <div class="container footer-inner">
       <span>&copy; Jason Paz-Romero</span>
@@ -54,6 +106,57 @@
           fill.style.width = `${rating * 20}%`;
         }
       });
+
+      const onboarding = document.querySelector('[data-onboarding]');
+      if (onboarding) {
+        const storageKey = 'bbla_seen_onboarding';
+        const closeButtons = onboarding.querySelectorAll('[data-skip], [data-onboarding-close]');
+        const nextButton = onboarding.querySelector('[data-next]');
+        const backButton = onboarding.querySelector('[data-back]');
+        const slides = Array.from(onboarding.querySelectorAll('[data-slide]'));
+        const dots = Array.from(onboarding.querySelectorAll('[data-dot]'));
+        let currentIndex = 0;
+
+        const setSlide = (index) => {
+          currentIndex = Math.max(0, Math.min(slides.length - 1, index));
+          slides.forEach((slide, idx) => {
+            slide.classList.toggle('is-active', idx === currentIndex);
+          });
+          dots.forEach((dot, idx) => {
+            dot.classList.toggle('is-active', idx === currentIndex);
+          });
+          if (backButton) backButton.disabled = currentIndex === 0;
+          if (nextButton) {
+            nextButton.textContent = currentIndex === slides.length - 1 ? 'Get started' : 'Next';
+          }
+        };
+
+        const closeOnboarding = () => {
+          localStorage.setItem(storageKey, 'true');
+          onboarding.setAttribute('hidden', '');
+        };
+
+        closeButtons.forEach((button) => {
+          button.addEventListener('click', closeOnboarding);
+        });
+
+        nextButton?.addEventListener('click', () => {
+          if (currentIndex === slides.length - 1) {
+            closeOnboarding();
+          } else {
+            setSlide(currentIndex + 1);
+          }
+        });
+
+        backButton?.addEventListener('click', () => {
+          setSlide(currentIndex - 1);
+        });
+
+        if (!localStorage.getItem(storageKey)) {
+          onboarding.removeAttribute('hidden');
+          setSlide(0);
+        }
+      }
     });
   </script>
 </body>

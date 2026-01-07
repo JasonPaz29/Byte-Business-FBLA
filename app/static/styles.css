@@ -80,6 +80,30 @@ a:hover {
   background: #eef1f5;
 }
 
+.nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f9fafb;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.nav-user-name {
+  font-weight: 600;
+  color: var(--text);
+}
+
 .button {
   display: inline-flex;
   align-items: center;
@@ -112,6 +136,18 @@ a:hover {
   color: var(--accent-strong);
   box-shadow: none;
   transform: none;
+}
+
+.button.danger {
+  border-color: #d04b4b;
+  background: #d04b4b;
+}
+
+.button.danger:hover {
+  background: #b64040;
+  border-color: #b64040;
+  box-shadow: 0 12px 22px rgba(208, 75, 75, 0.22);
+  color: #ffffff;
 }
 
 .page {
@@ -565,6 +601,18 @@ textarea {
   background: #f9fafb;
 }
 
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.review-action-form {
+  margin: 0;
+  display: inline-flex;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -694,6 +742,81 @@ textarea {
   color: var(--muted);
 }
 
+.onboarding {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.onboarding[hidden] {
+  display: none;
+}
+
+.onboarding-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 15, 24, 0.55);
+}
+
+.onboarding-card {
+  position: relative;
+  z-index: 1;
+  width: min(520px, 100%);
+  background: var(--card);
+  border-radius: 18px;
+  padding: 1.6rem 1.8rem;
+  box-shadow: 0 24px 48px rgba(10, 15, 24, 0.25);
+  border: 1px solid var(--border);
+}
+
+.onboarding-card h2 {
+  margin: 0 0 0.4rem;
+}
+
+.onboarding-progress {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.onboarding-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #dfe3e9;
+}
+
+.onboarding-dot.is-active {
+  background: var(--accent);
+}
+
+.onboarding-slide {
+  display: none;
+}
+
+.onboarding-slide.is-active {
+  display: block;
+}
+
+.onboarding-actions {
+  margin-top: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.onboarding-nav {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
 @media (max-width: 640px) {
   .header-inner {
     flex-direction: column;
@@ -703,6 +826,11 @@ textarea {
 
   .nav-links {
     gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .nav-right {
+    margin-left: 0;
     flex-wrap: wrap;
   }
 

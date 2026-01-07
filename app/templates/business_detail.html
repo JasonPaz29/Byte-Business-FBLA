@@ -69,56 +69,25 @@
       </div>
     </div>
 
-    <div class="grid-two" style="margin-top: 1rem;">
-      <div class="card">
-        <h3 style="margin-top: 0;">Details</h3>
-        <div class="info-grid">
-          <div class="stat">
-            <span class="muted">Hours</span>
-            <strong>{{ biz.hours|default('—') }}</strong>
-          </div>
-          <div class="stat">
-            <span class="muted">Contact</span>
-            <strong>{{ biz.contact|default('—') }}</strong>
-          </div>
-          <div class="stat">
-            <span class="muted">Website</span>
-            <strong>{{ biz.website|default('—') }}</strong>
-          </div>
-          <div class="stat">
-            <span class="muted">Address</span>
-            <strong>{{ biz.address|default('—') }}</strong>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 style="margin-top: 0;">Rating snapshot</h3>
-        <div class="grid-two">
-          <div class="stat">
-            <span class="muted">Service</span>
-            <strong>{{ biz.service_rating|default('4.8') }}</strong>
-          </div>
-          <div class="stat">
-            <span class="muted">Quality</span>
-            <strong>{{ biz.quality_rating|default('4.6') }}</strong>
-          </div>
-          <div class="stat">
-            <span class="muted">Atmosphere</span>
-            <strong>{{ biz.atmosphere_rating|default('4.7') }}</strong>
-          </div>
-          <div class="stat">
-            <span class="muted">Value</span>
-            <strong>{{ biz.value_rating|default('4.5') }}</strong>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="card" style="margin-top: 1rem;">
-      <h3 style="margin-top: 0;">Recent note</h3>
-      <div class="note">
-        {{ biz.recent_note|default('No notes yet. Be the first to leave feedback.') }}
+      <h3 style="margin-top: 0;">Details</h3>
+      <div class="info-grid">
+        <div class="stat">
+          <span class="muted">Hours</span>
+          <strong>{{ biz.hours|default('—') }}</strong>
+        </div>
+        <div class="stat">
+          <span class="muted">Contact</span>
+          <strong>{{ biz.contact|default('—') }}</strong>
+        </div>
+        <div class="stat">
+          <span class="muted">Website</span>
+          <strong>{{ biz.website|default('—') }}</strong>
+        </div>
+        <div class="stat">
+          <span class="muted">Address</span>
+          <strong>{{ biz.address|default('—') }}</strong>
+        </div>
       </div>
     </div>
 
@@ -164,6 +133,7 @@
           {% for review in review_items %}
           {% set rating_value = review.rating|int if review.rating is defined else 5 %}
           {% set can_edit_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
+          {% set can_delete_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
           <div class="review-item">
             <div class="row" style="align-items: baseline;">
               <strong>{{ review.user.username|default('Anonymous') }}</strong>
@@ -174,6 +144,11 @@
               <span class="muted">{{ review.date|default('Recent') }}</span>
               {% if can_edit_review %}
               <a class="muted" href="{{ url_for('main.edit_review', review_id=review.id|default(0)) }}">Edit review</a>
+              {% endif %}
+              {% if can_delete_review %}
+              <form method=POST action="{{ url_for('main.delete_review', review_id=review.id|default(0)) }}" style="display: inline;">
+                <button class="button danger" type="submit">Delete review</button>
+              </form>
               {% endif %}
             </div>
             <p class="muted" style="margin: 0.25rem 0 0;">{{ review.comment|default('No comment provided.') }}</p>

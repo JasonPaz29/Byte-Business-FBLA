@@ -4,11 +4,15 @@ from .models import User, Business, Review
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 from flask_login import login_required, current_user
+from .recommendations import recommended_businesses
+from .profanity_check import contains_profanity, censor_text
 
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def home():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.list_businesses"))
     return render_template('index.html')
 
 
@@ -16,7 +20,10 @@ def home():
 @login_required
 def list_businesses():
     businesses = Business.query.all()
-    return render_template('businesses.html', businesses=businesses)
+    recommended = recommended_businesses(current_user, businesses)
+    for r in recommended:
+        print(f"Recommended: {r.name} - Avg Rating: {r.average_rating()}")
+    return render_template('businesses.html', businesses=businesses, recommended=recommended)
 
 @main_bp.route('/businesses/<int:business_id>', methods=['GET'])
 @login_required
@@ -35,6 +42,9 @@ def submit_review(business_id):
     rating = int(request.form.get('rating', 0))
     comment = request.form.get('comment', '').strip()
 
+    if contains_profanity(comment):
+        comment = censor_text(comment)
+        flash("Your comment contained inappropriate language and has been censored.", "warning")
     if rating < 1 or rating > 5:
         flash("Rating must be between 1 and 5.", "danger")
         return redirect(url_for('main.business_detail', business_id=business.id))
@@ -84,3 +94,26 @@ def update_review(review_id):
 
     flash("Your review has been updated.", "success")
     return redirect(url_for('main.business_detail', business_id=review.business_id))
+
+@main_bp.route("/reviews/<int:review_id>/delete", methods=["POST"])
+@login_required
+def delete_review(review_id):
+    review = Review.query.get_or_404(review_id)
+    if review.user_id != current_user.id:
+        flash("You are not the owner of this review!", "danger")
+        return redirect(url_for("main.business_detail", business_id=review.business_id))
+    db.session.delete(review)
+    db.session.commit()
+    flash("The review has been successfully deleted.", "info")
+    return redirect(url_for("main.business_detail", business_id=review.business_id))
+
+@main_bp.route("/help")
+@login_required
+def help():
+    return render_template("help.html")
+
+@main_bp.route("/review")
+@login_required
+def reviews():
+    reviews = Review.query.filter_by(user_id=current_user.id).all()
+    return render_template("reviews.html", reviews=reviews)
