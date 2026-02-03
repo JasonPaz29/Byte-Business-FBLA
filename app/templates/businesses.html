@@ -107,7 +107,7 @@
         <p class="muted summary">{{ biz.description|default(biz.summary|default('Concise notes about the experience go here.')) }}</p>
         <div class="row" style="gap: 0.5rem;">
           <a class="button subtle" href="{{ url_for('main.business_detail', business_id=biz.id|default(loop.index)) }}">View details</a>
-          <span class="muted">{{ biz.reviews|length if biz.reviews is not none else '—' }} reviews • Updated {{ biz.updated|default('recently') }}</span>
+          <span class="muted">{{ biz.reviews|length if biz.reviews is not none else '—' }} reviews</span>
         </div>
       </div>
       {% endfor %}

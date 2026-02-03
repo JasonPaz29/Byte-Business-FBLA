@@ -57,9 +57,18 @@ a:hover {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  font-size: 1.1rem;
+  font-size: 1.28rem;
+}
+
+.brand-logo {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
 }
 
 .nav-links {
@@ -307,7 +316,7 @@ a:hover {
   text-transform: uppercase;
   text-decoration: none;
   box-shadow: 0 12px 20px rgba(31, 75, 153, 0.2);
-  transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
 }
 
 .bookmark-ribbon,
@@ -328,13 +337,13 @@ a:hover {
 }
 
 .bookmark-ribbon:hover {
-  background: var(--accent-strong);
-  transform: translateY(-1px);
-  box-shadow: 0 14px 24px rgba(21, 58, 115, 0.28);
+  filter: brightness(0.94);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 26px rgba(21, 58, 115, 0.26);
 }
 
 .bookmark-ribbon:hover::after {
-  border-top-color: var(--accent-strong);
+  border-top-color: #14356f;
 }
 
 .ribbon-label {
@@ -649,12 +658,25 @@ textarea {
   gap: 0.55rem;
 }
 
+.business-card .row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
 .business-card .summary {
   margin: 0.1rem 0 0.4rem;
 }
 
 .business-card .row h3 {
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.business-card .row .pill {
+  justify-self: end;
+  white-space: nowrap;
 }
 
 .business-meta {

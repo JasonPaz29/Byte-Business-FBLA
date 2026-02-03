@@ -6,7 +6,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 from flask_login import login_user, logout_user, login_required, current_user
 from .security import verify_turnstile
-from .verify_user import generate_email_token, verify_email_token
+from .verify_user import verify_email_token
+from .email_service import send_verification_email
 from .profanity_check import contains_profanity
 
 auth_bp = Blueprint('auth', __name__)
@@ -67,14 +68,11 @@ def register():
         user = User(username=username, email=email, password=hashed_password)
         db.session.add(user)
         db.session.commit()
-        token = generate_email_token(user.email)
-        verify_url = url_for("auth.verify_email", token=token, _external=True)
-
-        print("\n=== EMAIL VERIFICATION LINK (DEV) ===")
-        print(verify_url)
-        print("====================================\n")
-
-        flash("Account created! Check the terminal for your verification link.", "info")
+        email_sent, message = send_verification_email(user)
+        if email_sent:
+            flash(message, "info")
+        else:
+            flash(f"{message} You can try again after logging in.", "warning")
 
         flash("Registration successful. Please log in.", "success")
 

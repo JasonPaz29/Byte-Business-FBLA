@@ -6,6 +6,7 @@ from sqlalchemy import or_
 from flask_login import login_required, current_user
 from .recommendations import recommended_businesses
 from .profanity_check import contains_profanity, censor_text
+from .email_service import send_verification_email
 
 main_bp = Blueprint('main', __name__)
 
@@ -87,6 +88,9 @@ def update_review(review_id):
     if rating < 1 or rating > 5:
         flash("Rating must be between 1 and 5.", "danger")
         return redirect(url_for('main.business_detail', business_id=review.business_id))
+    if contains_profanity(comment):
+        comment = censor_text(comment)
+        flash("Your comment contained inappropriate language and has been censored.", "warning")
 
     review.rating = rating
     review.comment = comment
@@ -117,3 +121,18 @@ def help():
 def reviews():
     reviews = Review.query.filter_by(user_id=current_user.id).all()
     return render_template("reviews.html", reviews=reviews)
+
+
+@main_bp.route("/resend-verification")
+@login_required
+def resend_verification():
+    if current_user.is_verified:
+        flash("Your email is already verified.", "info")
+        return redirect(url_for("main.list_businesses"))
+
+    email_sent, message = send_verification_email(current_user)
+    if email_sent:
+        flash(message, "success")
+    else:
+        flash(message, "warning")
+    return redirect(url_for("main.list_businesses"))

@@ -13,6 +13,7 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_verified = db.Column(db.Boolean, default=False)
     verified_at = db.Column(db.DateTime, default=None)
+    last_verification_email_sent_at = db.Column(db.DateTime, default=None)
 
     bookmarks = db.relationship("BookMark", back_populates="user", cascade="all, delete-orphan")
     reviews = db.relationship("Review", back_populates="user", cascade="all, delete-orphan")

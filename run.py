@@ -1,9 +1,7 @@
 from app import create_app
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import os
-load_dotenv()
-print("SITE KEY:", os.environ.get("TURNSTILE_SITE_KEY"))
-print("SECRET KEY:", os.environ.get("TURNSTILE_SECRET_KEY"))
+load_dotenv(find_dotenv())
 
 
 app = create_app()
