@@ -9,6 +9,7 @@ bp = Blueprint("bookmarks", __name__)
 @login_required
 def bookmark(business_id):
     add_bookmark(current_user.id, business_id=business_id)
+    flash("Business bookmarked!", "success")
     return redirect(url_for("main.business_detail", business_id=business_id))
 
 @bp.route("/unbookmark/<int:business_id>")

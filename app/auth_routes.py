@@ -27,12 +27,12 @@ def logout():
 def verify_email(token):
     email = verify_email_token(token)
     if not email:
-        flash("Invalid or expired token.", "danger")
+        flash("Invalid or expired token.", "error")
         return redirect(url_for("auth.login"))
 
     user = User.query.filter_by(email=email).first()
     if not user:
-        flash("User not found.", "danger")
+        flash("User not found.", "error")
         return redirect(url_for("auth.login"))
     
     user.is_verified = True
@@ -45,11 +45,11 @@ def verify_email(token):
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        flash("You are already logged in.", "info")
+        flash("You are already logged in.", "error")
         return redirect(url_for("main.list_businesses"))
     if request.method == 'POST':
         if not verify_turnstile():
-            flash("Verification failed. Please try again.", "danger")
+            flash("Verification failed. Please try again.", "error")
             return render_template("auth/register.html")
         username = request.form.get('username')
         email = request.form.get('email')
@@ -57,11 +57,11 @@ def register():
         
         existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
         if existing_user:
-            flash("Username or email already exists.", "danger")
+            flash("Username or email already exists.", "error")
             return redirect(url_for('auth.register'))
         
         if contains_profanity(username):
-            flash("Username contains inappropriate language. Please choose another.", "danger")
+            flash("Username contains inappropriate language. Please choose another.", "error")
             return redirect(url_for('auth.register'))
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
@@ -93,6 +93,6 @@ def login():
             login_user(user)
             flash("Logged in successfully.", "success")
             return redirect(url_for("main.list_businesses"))
-        flash("Incorrect Username/Email or Password", "danger")
+        flash("Incorrect Username/Email or Password", "error")
 
     return render_template("auth/login.html")

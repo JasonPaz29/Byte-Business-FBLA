@@ -14,10 +14,12 @@ class User(db.Model, UserMixin):
     is_verified = db.Column(db.Boolean, default=False)
     verified_at = db.Column(db.DateTime, default=None)
     last_verification_email_sent_at = db.Column(db.DateTime, default=None)
+    is_admin = db.Column(db.Boolean, default=False)
 
     bookmarks = db.relationship("BookMark", back_populates="user", cascade="all, delete-orphan")
     reviews = db.relationship("Review", back_populates="user", cascade="all, delete-orphan")
     redeemed_deals = db.relationship("RedeemDeal", back_populates="user", cascade="all, delete-orphan")
+    business_requests = db.relationship("BusinessRequest", back_populates="user", cascade="all, delete-orphan")
 
 class Business(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -86,3 +88,26 @@ class RedeemDeal(db.Model):
 
     deal = db.relationship("Deal", back_populates="redeemed_deals")
     user = db.relationship("User", back_populates="redeemed_deals")
+
+
+class BusinessRequest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    business_name = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200), nullable=False)
+    address = db.Column(db.String(300), nullable=False)
+    category = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    website = db.Column(db.String(300), nullable=True)
+    contact = db.Column(db.String(50), nullable=True)
+    hours = db.Column(db.String(200), nullable=True)
+
+    is_active = db.Column(db.Boolean, default=True)
+    decision_notes = db.Column(db.Text, nullable=True)
+    reviewed_at = db.Column(db.DateTime, default=None) 
+    reason_declined = db.Column(db.Text, nullable=True)    
+    
+    user = db.relationship("User", back_populates="business_requests")
+    

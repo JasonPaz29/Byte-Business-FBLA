@@ -20,6 +20,11 @@ def recommended_businesses(user, businesses, limit=6):
         
         if getattr(business, "deals", None):
             score += 2
+            
+        bookmark_categories = (b.business.category for b in getattr(user, "bookmarks", []))
+        
+        if business.category in bookmark_categories:
+            score += 2
         
         scored.append((business, score))
     

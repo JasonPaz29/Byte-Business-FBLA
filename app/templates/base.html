@@ -44,7 +44,10 @@
         {% if messages %}
           <div class="flash-stack">
             {% for category, message in messages %}
-              <div class="alert {{ category }}">{{ message }}</div>
+              <div class="alert {{ category }}" role="alert">
+                <span>{{ message }}</span>
+                <button class="alert-close" type="button" aria-label="Close alert">×</button>
+              </div>
             {% endfor %}
           </div>
         {% endif %}
@@ -52,6 +55,12 @@
     </div>
     {% block content %}{% endblock %}
   </main>
+
+  {% if current_user.is_authenticated and not current_user.is_verified %}
+  <a class="verify-fab" href="{{ url_for('main.resend_verification') }}" aria-label="Resend verification email">
+    Not Verified? Click Here!
+  </a>
+  {% endif %}
 
   <div class="onboarding" data-onboarding hidden>
     <div class="onboarding-backdrop" data-onboarding-close></div>
@@ -160,6 +169,13 @@
           setSlide(0);
         }
       }
+
+      document.querySelectorAll('.alert-close').forEach((button) => {
+        button.addEventListener('click', () => {
+          const alert = button.closest('.alert');
+          if (alert) alert.remove();
+        });
+      });
     });
   </script>
 </body>

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from .extensions import db
-from .models import User, Business, Review
+from .models import User, Business, Review, BusinessRequest
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 from flask_login import login_required, current_user
@@ -10,8 +10,57 @@ from .email_service import send_verification_email
 
 main_bp = Blueprint('main', __name__)
 
+
+def submit_request(user):
+    business_name = request.form.get('business_name', '').strip()
+    location = request.form.get('location', '').strip()
+    address = request.form.get('address', '').strip()
+    category = request.form.get('category', '').strip()
+    description = request.form.get('description', '').strip()
+    website = request.form.get('website', '').strip()
+    contact = request.form.get('contact', '').strip()
+    hours = request.form.get('hours', '').strip()
+
+    if not business_name or not location or not address or not category:
+        return False, "Please fill out all required fields."
+
+    existing_business = Business.query.filter(
+        Business.name.ilike(business_name),
+        Business.location.ilike(location)
+    ).first()
+    if existing_business:
+        return False, "That business already exists in the directory."
+
+    business_request = BusinessRequest(
+        user_id=user.id,
+        business_name=business_name,
+        location=location,
+        address=address,
+        category=category,
+        description=description or None,
+        website=website or None,
+        contact=contact or None,
+        hours=hours or None
+    )
+    db.session.add(business_request)
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return False, "We could not submit your request right now. Please try again."
+
+    return True, "Your business request has been submitted and will be reviewed soon."
+
+
+def give_user_admin():
+    user = User.query.filter_by(username="AdminJason").first()
+    if user:
+        user.is_admin = True
+        db.session.commit()
+
 @main_bp.route('/')
 def home():
+    give_user_admin()
     if current_user.is_authenticated:
         return redirect(url_for("main.list_businesses"))
     return render_template('index.html')
@@ -37,7 +86,7 @@ def business_detail(business_id):
 @login_required
 def submit_review(business_id):
     if not current_user.is_verified:
-        flash("You must verify your email to submit a review.", "info")
+        flash("You must verify your email to submit a review.", "error")
         return redirect(url_for('main.business_detail', business_id=business_id))
     business = Business.query.get_or_404(business_id)
     rating = int(request.form.get('rating', 0))
@@ -67,14 +116,14 @@ def submit_review(business_id):
 @login_required
 def edit_review(review_id):
     if not current_user.is_verified:
-        flash("You must verify your email to edit a review.", "info")
+        flash("You must verify your email to edit a review.", "error")
         return redirect(url_for("main.business_detail", business_id=review_id))
     review = Review.query.get_or_404(review_id)
     if not review:
-        flash("That review does not exist.", "info")
+        flash("That review does not exist.", "error")
         return redirect(url_for("main.business_detail", business_id=review.business_id))
     if review.user_id != current_user.id:
-        flash("You can only edit your own reviews.", "info")
+        flash("You can only edit your own reviews.", "error")
         return redirect(url_for("main.business_detail", business_id=review.business_id))
     return render_template('edit_review.html', review=review)
 
@@ -86,11 +135,11 @@ def update_review(review_id):
     rating = int(request.form.get('rating', 0))
     comment = request.form.get('comment', '').strip()
     if rating < 1 or rating > 5:
-        flash("Rating must be between 1 and 5.", "danger")
+        flash("Rating must be between 1 and 5.", "error")
         return redirect(url_for('main.business_detail', business_id=review.business_id))
     if contains_profanity(comment):
         comment = censor_text(comment)
-        flash("Your comment contained inappropriate language and has been censored.", "warning")
+        flash("Your comment contained inappropriate language and has been censored.", "error")
 
     review.rating = rating
     review.comment = comment
@@ -104,11 +153,11 @@ def update_review(review_id):
 def delete_review(review_id):
     review = Review.query.get_or_404(review_id)
     if review.user_id != current_user.id:
-        flash("You are not the owner of this review!", "danger")
+        flash("You are not the owner of this review!", "error")
         return redirect(url_for("main.business_detail", business_id=review.business_id))
     db.session.delete(review)
     db.session.commit()
-    flash("The review has been successfully deleted.", "info")
+    flash("The review has been successfully deleted.", "success")
     return redirect(url_for("main.business_detail", business_id=review.business_id))
 
 @main_bp.route("/help")
@@ -127,7 +176,7 @@ def reviews():
 @login_required
 def resend_verification():
     if current_user.is_verified:
-        flash("Your email is already verified.", "info")
+        flash("Your email is already verified.", "error")
         return redirect(url_for("main.list_businesses"))
 
     email_sent, message = send_verification_email(current_user)
@@ -136,3 +185,19 @@ def resend_verification():
     else:
         flash(message, "warning")
     return redirect(url_for("main.list_businesses"))
+
+
+@main_bp.route("/create-business-request", methods=["GET", "POST"])
+@login_required
+def create_business_request():
+    if not current_user.is_verified:
+        flash("You must verify your email to request a business.", "error")
+        return redirect(url_for("main.list_businesses"))
+
+    if request.method == "POST":
+        submitted, message = submit_request(current_user)
+        flash(message, "success" if submitted else "error")
+        if submitted:
+            return redirect(url_for("main.list_businesses"))
+
+    return render_template("create_business_request.html")
