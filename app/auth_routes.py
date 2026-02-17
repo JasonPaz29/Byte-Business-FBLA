@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 from flask_login import login_user, logout_user, login_required, current_user
 from .security import verify_turnstile
-from .verify_user import verify_email_token
+from .verify_user import verify_email_token, verify_forgot_password_token
 from .email_service import send_verification_email
 from .profanity_check import contains_profanity
 
@@ -40,6 +40,50 @@ def verify_email(token):
     db.session.commit()
     flash("Email verified successfully!", "success")
     return redirect(url_for("main.list_businesses"))
+
+@auth_bp.route('/forgot_password/<token>')
+def verify_forgot_password(token):
+    email = verify_forgot_password_token(token)
+    if not email:
+        flash("Invalid or expired token.", "error")
+        return redirect(url_for("auth.login"))
+    
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        flash("User not found.", "error")
+        return redirect(url_for("auth.login"))
+    
+    flash("Token verified! Please reset your password.", "success")
+    return redirect(url_for("auth.reset_password", token=token))
+
+@auth_bp.route('/reset_password/<token>', methods=["GET", "POST"])
+def reset_password(token):
+    email = verify_forgot_password_token(token)
+    if not email:
+        flash("Invalid or expired token.", "error")
+        return redirect(url_for("auth.login"))
+    
+    user = User.query.filter_by(email=email).first()
+    
+    if not user:
+        flash("User not found.", "error")
+        return redirect(url_for("auth.login"))
+    
+    if request.method == "POST":
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+        if new_password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return render_template("auth/reset_password.html", token=token)
+        if not new_password:
+            flash("New password is required.", "error")
+            return render_template("auth/reset_password.html", token=token)
+        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash("Password reset successfully!", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("auth/reset_password.html", token=token)
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])

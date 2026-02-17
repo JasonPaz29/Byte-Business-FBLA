@@ -21,12 +21,13 @@ def create_app():
         }
 
 
-    from . import routes, models, auth_routes, bookmarks, deals
+    from . import routes, models, auth_routes, bookmarks, deals, forgot_password_service
     # Register blueprints or routes
     app.register_blueprint(routes.main_bp)
     app.register_blueprint(auth_routes.auth_bp)
     app.register_blueprint(bookmarks.bp)
     app.register_blueprint(deals.deal_bp)
+    app.register_blueprint(forgot_password_service.fp_bp)
 
 
     return app

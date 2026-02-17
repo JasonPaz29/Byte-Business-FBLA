@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block title %}Request a Business | Byte Business{% endblock %}
+{% block title %}Claim a Business | Byte Business{% endblock %}
 
 {% block content %}
 <div class="container auth-layout">
   <div class="auth-card">
-    <h1>Request a business</h1>
-    <p>Share details and we will review your request for the directory.</p>
+    <h1>Claim a business</h1>
+    <p>Share details and we will review your claim for the directory.</p>
     <form method="POST" action="{{ url_for('main.create_business_request') }}">
       <div>
         <label for="business_name">Business name *</label>

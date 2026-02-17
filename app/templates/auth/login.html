@@ -15,6 +15,9 @@
         <label for="password">Password</label>
         <input id="password" name="password" type="password" placeholder="Enter your password" required>
       </div>
+      <p class="muted" style="margin: 0;">
+        <a href="{{ url_for('forgot_password.forgot_password') }}">Forgot password?</a>
+      </p>
       <button class="button" type="submit">Log in</button>
     </form>
     <p class="muted" style="margin-top: 1rem;">New here? <a href="{{ url_for('auth.register') }}">Create an account</a>.</p>
