@@ -154,6 +154,7 @@
           {% set can_delete_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
           {% set review_date = review.created_at.strftime('%m-%d-%Y') if review.created_at is defined and review.created_at and review.created_at is not string else review.created_at|default('Recent') %}
           {% set review_created_at_raw = review.created_at.isoformat() if review.created_at is defined and review.created_at and review.created_at is not string else review.created_at|default('') %}
+          {% set review_images = review.review_images if review.review_images is defined and review.review_images is not none else [] %}
           <div class="review-item" data-review-item data-created-at="{{ review_created_at_raw }}" data-rating="{{ rating_value }}" data-order="{{ loop.index0 }}">
             <div class="row" style="align-items: baseline;">
               <strong>{{ review.user.username|default('Anonymous') }}</strong>
@@ -172,6 +173,16 @@
               {% endif %}
             </div>
             <p class="muted" style="margin: 0.25rem 0 0;">{{ review.comment|default('No comment provided.') }}</p>
+            {% if review_images and review_images|length > 0 %}
+            <div class="review-images">
+              {% for image_item in review_images %}
+              {% set image_src = image_item.image_url if image_item.image_url is defined else image_item %}
+              <a href="{{ image_src }}" target="_blank" rel="noopener noreferrer" class="review-image-link">
+                <img src="{{ image_src }}" alt="Review image {{ loop.index }}" class="review-image" loading="lazy">
+              </a>
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
           {% endfor %}
         </div>
@@ -179,7 +190,7 @@
 
       <div class="card">
         <h3 style="margin-top: 0;">Leave a review</h3>
-        <form method="POST" action="{{ url_for('main.submit_review', business_id=biz.id|default(0)) }}">
+        <form method="POST" action="{{ url_for('main.submit_review', business_id=biz.id|default(0)) }}" enctype="multipart/form-data">
           <div>
             <label for="rating">Rating</label>
             <select id="rating" name="rating" required>
@@ -194,6 +205,12 @@
           <div>
             <label for="comment">Comment</label>
             <textarea id="comment" name="comment" rows="3" placeholder="Share a short note (optional)" style="width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: #f9fafb; color: var(--text);"></textarea>
+          </div>
+          <div>
+            <label for="review_images">Add images</label>
+            <input id="review_images" name="review_images" type="file" accept="image/*" multiple>
+            <p class="muted review-upload-help">You can upload one or more images with your review.</p>
+            <div class="review-image-preview" id="review-image-preview" aria-live="polite"></div>
           </div>
           <button class="button" type="submit">Submit review</button>
         </form>
@@ -301,6 +318,23 @@
         currentPage += 1;
         render();
       }
+    });
+
+    const reviewImagesInput = document.getElementById('review_images');
+    const reviewPreview = document.getElementById('review-image-preview');
+    reviewImagesInput?.addEventListener('change', () => {
+      if (!reviewPreview) return;
+      reviewPreview.innerHTML = '';
+      const files = Array.from(reviewImagesInput.files || []);
+      files.forEach((file) => {
+        if (!file.type.startsWith('image/')) return;
+        const previewImage = document.createElement('img');
+        previewImage.className = 'preview-thumb';
+        previewImage.alt = file.name;
+        previewImage.src = URL.createObjectURL(file);
+        previewImage.addEventListener('load', () => URL.revokeObjectURL(previewImage.src), { once: true });
+        reviewPreview.appendChild(previewImage);
+      });
     });
 
     render();

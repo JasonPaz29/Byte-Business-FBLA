@@ -13,3 +13,6 @@ class Config:
     MAIL_USERNAME = os.environ.get("MAIL_USERNAME")
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", "Byte Business <no-reply@bytebusiness.com>")
+    CLOUD_NAME = os.environ.get("CLOUD_NAME")
+    API_KEY = os.environ.get("API_KEY")
+    API_SECRET = os.environ.get("API_SECRET")

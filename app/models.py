@@ -53,6 +53,7 @@ class Review(db.Model):
 
     user = db.relationship("User", back_populates="reviews")
     business = db.relationship("Business", back_populates="reviews")
+    review_images = db.relationship("ReviewImage", back_populates="review", cascade="all, delete-orphan")
 
 class BookMark(db.Model):
     __tablename__ = "bookmarks"
@@ -111,3 +112,14 @@ class BusinessRequest(db.Model):
     
     user = db.relationship("User", back_populates="business_requests")
     
+
+class ReviewImage(db.Model):
+    __tablename__ = "review_images"
+    id = db.Column(db.Integer, primary_key=True)
+    review_id = db.Column(db.Integer, db.ForeignKey("review.id"), nullable=False)
+    image_url = db.Column(db.String(300), nullable=False)
+    public_id = db.Column(db.String(300), nullable=False)
+    
+    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    review = db.relationship("Review", back_populates="review_images")

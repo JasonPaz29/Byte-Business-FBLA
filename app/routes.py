@@ -1,14 +1,20 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from .extensions import db
-from .models import User, Business, Review, BusinessRequest
+from .models import User, Business, Review, BusinessRequest, ReviewImage
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 from flask_login import login_required, current_user
 from .recommendations import recommended_businesses
 from .profanity_check import contains_profanity, censor_text
 from .email_service import send_verification_email
+import cloudinary.uploader
 
 main_bp = Blueprint('main', __name__)
+
+
+ALLOWED_FORMATS = {'png', 'jpg', 'jpeg', 'webp'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+MAX_IMAGES = 4
 
 
 def submit_request(user):
@@ -92,6 +98,29 @@ def submit_review(business_id):
     rating = int(request.form.get('rating', 0))
     comment = request.form.get('comment', '').strip()
 
+    images = [image for image in request.files.getlist("review_images") if image and image.filename]
+
+    if len(images) > MAX_IMAGES:
+        flash(f"You can upload a maximum of {MAX_IMAGES} images.", "error")
+        return redirect(url_for("main.business_detail", business_id=business.id))
+
+    for image in images:
+        extension = image.filename.rsplit(".", 1)[-1].lower() if "." in image.filename else ""
+        if extension not in ALLOWED_FORMATS:
+            flash(f"Only the following image formats are allowed: {', '.join(sorted(ALLOWED_FORMATS))}.", "error")
+            return redirect(url_for("main.business_detail", business_id=business.id))
+
+        size = image.content_length
+        if size is None:
+            current_position = image.stream.tell()
+            image.stream.seek(0, 2)
+            size = image.stream.tell()
+            image.stream.seek(current_position)
+        if size > MAX_FILE_SIZE:
+            flash("Each image must be less than 5MB in size.", "error")
+            return redirect(url_for("main.business_detail", business_id=business.id))
+        image.stream.seek(0)
+
     if contains_profanity(comment):
         comment = censor_text(comment)
         flash("Your comment contained inappropriate language and has been censored.", "warning")
@@ -106,7 +135,31 @@ def submit_review(business_id):
         comment=comment
     )
     db.session.add(review)
-    db.session.commit()
+    db.session.flush()
+    uploaded_public_ids = []
+    try:
+        for image in images:
+            res = cloudinary.uploader.upload(image, folder="byte-business/reviews")
+            public_id = res.get("public_id")
+            uploaded_public_ids.append(public_id)
+            review_image = ReviewImage(
+                review_id=review.id,
+                image_url=res["secure_url"],
+                public_id=public_id
+            )
+            db.session.add(review_image)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        for public_id in uploaded_public_ids:
+            if not public_id:
+                continue
+            try:
+                cloudinary.uploader.destroy(public_id)
+            except Exception:
+                pass
+        flash("One or more images could not be uploaded. Please try again.", "warning")
+        return redirect(url_for('main.business_detail', business_id=business.id))
 
     flash("Your review has been submitted.", "success")
     return redirect(url_for('main.business_detail', business_id=business.id))
@@ -155,6 +208,13 @@ def delete_review(review_id):
     if review.user_id != current_user.id:
         flash("You are not the owner of this review!", "error")
         return redirect(url_for("main.business_detail", business_id=review.business_id))
+    
+    images = ReviewImage.query.filter_by(review_id=review.id).all()
+    for image in images:
+        try:
+            cloudinary.uploader.destroy(image.public_id)
+        except Exception:
+            pass
     db.session.delete(review)
     db.session.commit()
     flash("The review has been successfully deleted.", "success")

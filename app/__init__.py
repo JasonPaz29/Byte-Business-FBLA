@@ -1,6 +1,7 @@
 from flask import Flask, current_app
 from .config import Config
 from .extensions import db, migrate, login_manager, mail
+import cloudinary
 
 
 def create_app():
@@ -13,6 +14,12 @@ def create_app():
     login_manager.init_app(app)
     mail.init_app(app)
     login_manager.login_view = 'auth.login'
+    cloudinary.config(
+        cloud_name=app.config.get("CLOUD_NAME"),
+        api_key=app.config.get("API_KEY"),
+        api_secret=app.config.get("API_SECRET"),
+        secure=True
+    )
 
     @app.context_processor
     def inject_turnstile_key():
