@@ -1,12 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from .extensions import db
 from .models import User, Business, Review, BusinessRequest, ReviewImage
-from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
 from flask_login import login_required, current_user
 from .recommendations import recommended_businesses
 from .profanity_check import contains_profanity, censor_text
 from .email_service import send_verification_email
+from datetime import datetime
 import cloudinary.uploader
 
 main_bp = Blueprint('main', __name__)
@@ -57,16 +57,8 @@ def submit_request(user):
 
     return True, "Your business request has been submitted and will be reviewed soon."
 
-
-def give_user_admin():
-    user = User.query.filter_by(username="AdminJason").first()
-    if user:
-        user.is_admin = True
-        db.session.commit()
-
 @main_bp.route('/')
 def home():
-    give_user_admin()
     if current_user.is_authenticated:
         return redirect(url_for("main.list_businesses"))
     return render_template('index.html')
@@ -95,7 +87,11 @@ def submit_review(business_id):
         flash("You must verify your email to submit a review.", "error")
         return redirect(url_for('main.business_detail', business_id=business_id))
     business = Business.query.get_or_404(business_id)
-    rating = int(request.form.get('rating', 0))
+    try: 
+        rating = int(request.form.get('rating', 0))
+    except ValueError:
+        flash("Invalid rating value.", "error")
+        return redirect(url_for('main.business_detail', business_id=business.id))
     comment = request.form.get('comment', '').strip()
 
     images = [image for image in request.files.getlist("review_images") if image and image.filename]
@@ -172,9 +168,6 @@ def edit_review(review_id):
         flash("You must verify your email to edit a review.", "error")
         return redirect(url_for("main.business_detail", business_id=review_id))
     review = Review.query.get_or_404(review_id)
-    if not review:
-        flash("That review does not exist.", "error")
-        return redirect(url_for("main.business_detail", business_id=review.business_id))
     if review.user_id != current_user.id:
         flash("You can only edit your own reviews.", "error")
         return redirect(url_for("main.business_detail", business_id=review.business_id))
@@ -261,3 +254,76 @@ def create_business_request():
             return redirect(url_for("main.list_businesses"))
 
     return render_template("create_business_request.html")
+
+@main_bp.route("/business-requests", methods=["GET"])
+@login_required
+def user_business_requests():
+    requests = BusinessRequest.query.filter_by(user_id=current_user.id).order_by(BusinessRequest.created_at.desc()).all()
+    return render_template("user_business_requests.html", requests=requests)
+
+@main_bp.route("/business-requests/admin", methods=["GET"])
+@login_required
+def business_requests_admin():
+    if not current_user.is_admin:
+        flash("You do not have permission to view that page.", "error")
+        return redirect(url_for("main.list_businesses"))
+    requests = BusinessRequest.query.order_by(BusinessRequest.created_at.desc()).all()
+    return render_template("business_requests.html", requests=requests)
+
+@main_bp.route("/business-requests/<int:request_id>/approve", methods=["POST"])
+@login_required
+def approve_business_request(request_id):
+    if not current_user.is_admin:
+        flash("You do not have permission to perform that action.", "error")
+        return redirect(url_for("main.list_businesses"))
+    business_request = BusinessRequest.query.get_or_404(request_id)
+    if business_request.is_active == False and business_request.reviewed_at is not None:
+        flash("This business request has already been reviewed.", "error")
+        return redirect(url_for("main.business_requests_admin"))
+    notes = request.form.get("notes")
+    existing_business = Business.query.filter(
+        Business.name.ilike(business_request.business_name),
+        Business.location.ilike(business_request.location)
+    ).first()
+    if existing_business:
+        flash("That business already exists in the directory.", "error")
+        return redirect(url_for("main.business_requests_admin"))
+    business = Business(
+        name=business_request.business_name,
+        location=business_request.location,
+        address=business_request.address,
+        category=business_request.category,
+        description=business_request.description,
+        website=business_request.website,
+        contact=business_request.contact,
+        hours=business_request.hours
+    )
+    db.session.add(business)
+    business_request.decision_notes = notes
+    business_request.reviewed_at = datetime.utcnow()
+    business_request.is_active = False
+    db.session.commit()
+    flash("The business has been successfully created.", "success")
+    return redirect(url_for("main.list_businesses"))
+
+@main_bp.route("/business-requests/<int:request_id>/decline", methods=["POST"])
+@login_required
+def decline_business_request(request_id):
+    if not current_user.is_admin:
+        flash("You are not allowed to make this decision!", "error")
+        return redirect(url_for("main.list_businesses"))
+    
+    business_request = BusinessRequest.query.get_or_404(request_id)
+    if business_request.is_active == False and business_request.reviewed_at is not None:
+        flash("This business request has already been reviewed.", "error")
+        return redirect(url_for("main.business_requests_admin"))
+    notes = request.form.get("notes")
+    reason_declined = request.form.get("reason_declined")
+    
+    business_request.decision_notes = notes
+    business_request.reason_declined = reason_declined
+    business_request.reviewed_at = datetime.utcnow()
+    business_request.is_active = False
+    db.session.commit()
+    flash("The business request has been successfully declined.", "success")
+    return redirect(url_for("main.business_requests_admin"))
