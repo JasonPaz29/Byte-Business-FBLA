@@ -17,7 +17,7 @@
       <div class="row" style="gap: 0.55rem; align-items: center;">
         <a class="button" href="{{ url_for('main.create_business_request') }}">Claim a Business</a>
         {% if current_user.is_admin %}
-        <a class="button subtle" href="{{ url_for('main.business_requests_admin') }}">Review Business Claims</a>
+        <a class="button subtle" href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a>
         {% else %}
         <a class="button subtle" href="{{ url_for('main.user_business_requests') }}">Claimed Businesses</a>
         {% endif %}

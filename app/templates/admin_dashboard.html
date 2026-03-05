@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | Byte Business{% endblock %}
+
+{% block content %}
+<div class="container">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h2>Admin Dashboard</h2>
+        <p>Manage users, reviews, businesses, and submitted business requests.</p>
+      </div>
+      <div class="row" style="gap: 0.55rem; align-items: center;">
+        <a class="button subtle" href="{{ url_for('admin.business_requests_admin') }}">Review Request Queue</a>
+        <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Back to Businesses</a>
+      </div>
+    </div>
+
+    <div class="info-grid" style="margin-bottom: 1rem;">
+      <div class="stat">
+        <span class="muted">Users</span>
+        <strong>{{ users|length }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">Reviews</span>
+        <strong>{{ reviews|length }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">Businesses</span>
+        <strong>{{ businesses|length }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">Business Requests</span>
+        <strong>{{ business_requests|length }}</strong>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 1rem;" data-lazy-region data-page-size="6">
+      <div class="section-header" style="margin-bottom: 0.8rem;">
+        <h3 style="margin: 0;">Users</h3>
+      </div>
+      <div class="card-grid">
+        {% for user in users %}
+        <article class="card" data-lazy-item>
+          <div class="row" style="align-items: baseline;">
+            <strong>{{ user.username }}</strong>
+            {% if user.is_admin %}
+            <span class="pill">Admin</span>
+            {% endif %}
+            {% if user.is_active %}
+            <span class="pill" style="background:#e8f6eb;color:#2f7a40;">Active</span>
+            {% else %}
+            <span class="pill" style="background:#fbe7e7;color:#9c2f2f;">Inactive</span>
+            {% endif %}
+          </div>
+          <p class="muted" style="margin: 0.4rem 0 0;">{{ user.email }}</p>
+          <p class="muted" style="margin: 0.25rem 0 0;">Joined: {{ user.created_at.strftime('%m-%d-%Y') if user.created_at else '—' }}</p>
+          <div class="row" style="gap: 0.45rem; margin-top: 0.7rem;">
+            {% if user.is_active %}
+            <form method="POST" action="{{ url_for('admin.admin_deactivate_user', user_id=user.id) }}">
+              <button class="button subtle" type="submit">Deactivate</button>
+            </form>
+            {% else %}
+            <form method="POST" action="{{ url_for('admin.admin_activate_user', user_id=user.id) }}">
+              <button class="button" type="submit">Activate</button>
+            </form>
+            {% endif %}
+            <button class="button danger" type="button" disabled title="Delete route removed">Delete</button>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      <div class="row" style="justify-content: center; margin-top: 0.8rem;">
+        <button class="button subtle" type="button" data-load-more>Load more users</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 1rem;" data-lazy-region data-page-size="6">
+      <div class="section-header" style="margin-bottom: 0.8rem;">
+        <h3 style="margin: 0;">Reviews</h3>
+      </div>
+      <div class="card-grid">
+        {% for review in reviews %}
+        <article class="card" data-lazy-item>
+          <div class="row" style="align-items: baseline;">
+            <strong>Review #{{ review.id }}</strong>
+            <span class="pill">{{ review.rating }}/5</span>
+            {% if review.is_visible %}
+            <span class="pill" style="background:#e8f6eb;color:#2f7a40;">Visible</span>
+            {% else %}
+            <span class="pill" style="background:#fbe7e7;color:#9c2f2f;">Hidden</span>
+            {% endif %}
+          </div>
+          <p class="muted" style="margin: 0.4rem 0 0;">User ID: {{ review.user_id }}</p>
+          <p class="muted" style="margin: 0.25rem 0 0;">Business ID: {{ review.business_id }}</p>
+          <p class="muted" style="margin: 0.25rem 0 0;">Created: {{ review.created_at.strftime('%m-%d-%Y') if review.created_at else '—' }}</p>
+          {% if review.comment %}
+          <p class="muted" style="margin: 0.55rem 0 0;">{{ review.comment[:140] }}{% if review.comment|length > 140 %}...{% endif %}</p>
+          {% endif %}
+          <div class="row" style="gap: 0.45rem; margin-top: 0.7rem;">
+            {% if review.is_visible %}
+            <form method="POST" action="{{ url_for('admin.admin_hide_review', review_id=review.id) }}">
+              <button class="button subtle" type="submit">Hide</button>
+            </form>
+            {% else %}
+            <form method="POST" action="{{ url_for('admin.admin_show_review', review_id=review.id) }}">
+              <button class="button" type="submit">Show</button>
+            </form>
+            {% endif %}
+            <button class="button danger" type="button" disabled title="Delete route removed">Delete</button>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      <div class="row" style="justify-content: center; margin-top: 0.8rem;">
+        <button class="button subtle" type="button" data-load-more>Load more reviews</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom: 1rem;" data-lazy-region data-page-size="6">
+      <div class="section-header" style="margin-bottom: 0.8rem;">
+        <h3 style="margin: 0;">Businesses</h3>
+      </div>
+      <div class="card-grid">
+        {% for biz in businesses %}
+        <article class="card" data-lazy-item>
+          <div class="row" style="align-items: baseline;">
+            <strong>{{ biz.name }}</strong>
+            <span class="pill">{{ biz.category }}</span>
+            {% if biz.is_active %}
+            <span class="pill" style="background:#e8f6eb;color:#2f7a40;">Active</span>
+            {% else %}
+            <span class="pill" style="background:#fbe7e7;color:#9c2f2f;">Inactive</span>
+            {% endif %}
+          </div>
+          <p class="muted" style="margin: 0.4rem 0 0;">{{ biz.location }}</p>
+          <p class="muted" style="margin: 0.25rem 0 0;">{{ biz.address }}</p>
+          <p class="muted" style="margin: 0.25rem 0 0;">Created: {{ biz.created_at.strftime('%m-%d-%Y') if biz.created_at else '—' }}</p>
+          <div class="row" style="gap: 0.45rem; margin-top: 0.7rem;">
+            {% if biz.is_active %}
+            <form method="POST" action="{{ url_for('admin.admin_deactivate_business', business_id=biz.id) }}">
+              <button class="button subtle" type="submit">Deactivate</button>
+            </form>
+            {% else %}
+            <form method="POST" action="{{ url_for('admin.admin_activate_business', business_id=biz.id) }}">
+              <button class="button" type="submit">Activate</button>
+            </form>
+            {% endif %}
+            <button class="button danger" type="button" disabled title="Route not added yet">Delete</button>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      <div class="row" style="justify-content: center; margin-top: 0.8rem;">
+        <button class="button subtle" type="button" data-load-more>Load more businesses</button>
+      </div>
+    </div>
+
+    <div class="card" data-lazy-region data-page-size="6">
+      <div class="section-header" style="margin-bottom: 0.8rem;">
+        <h3 style="margin: 0;">Business Requests</h3>
+      </div>
+      <div class="card-grid">
+        {% for req in business_requests %}
+        {% set is_reviewed = (not req.is_active) and req.reviewed_at %}
+        {% set is_rejected = is_reviewed and req.reason_declined %}
+        {% set status_label = 'Pending' if req.is_active else ('Rejected' if is_rejected else 'Approved') %}
+        <article class="card" data-lazy-item>
+          <div class="row" style="align-items: baseline;">
+            <strong>{{ req.business_name }}</strong>
+            <span class="pill">{{ status_label }}</span>
+          </div>
+          <p class="muted" style="margin: 0.4rem 0 0;">Requested by User ID: {{ req.user_id }}</p>
+          <p class="muted" style="margin: 0.25rem 0 0;">Requested: {{ req.created_at.strftime('%m-%d-%Y') if req.created_at else '—' }}</p>
+          <p class="muted" style="margin: 0.25rem 0 0;">Reviewed: {{ req.reviewed_at.strftime('%m-%d-%Y') if req.reviewed_at else 'Not reviewed yet' }}</p>
+          {% if req.decision_notes %}
+          <p class="muted" style="margin: 0.55rem 0 0;"><strong>Notes:</strong> {{ req.decision_notes }}</p>
+          {% endif %}
+          {% if req.reason_declined %}
+          <p class="muted" style="margin: 0.25rem 0 0;"><strong>Reason declined:</strong> {{ req.reason_declined }}</p>
+          {% endif %}
+        </article>
+        {% endfor %}
+      </div>
+      <div class="row" style="justify-content: center; margin-top: 0.8rem;">
+        <button class="button subtle" type="button" data-load-more>Load more requests</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const regions = document.querySelectorAll('[data-lazy-region]');
+    regions.forEach((region) => {
+      const items = Array.from(region.querySelectorAll('[data-lazy-item]'));
+      const button = region.querySelector('[data-load-more]');
+      const pageSize = parseInt(region.dataset.pageSize || '6', 10);
+      let visibleCount = pageSize;
+
+      const render = () => {
+        items.forEach((item, index) => {
+          item.style.display = index < visibleCount ? '' : 'none';
+        });
+        if (button) {
+          button.style.display = visibleCount >= items.length ? 'none' : '';
+        }
+      };
+
+      button?.addEventListener('click', () => {
+        visibleCount += pageSize;
+        render();
+      });
+
+      render();
+    });
+  });
+</script>
+{% endblock %}

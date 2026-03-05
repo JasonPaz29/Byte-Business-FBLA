@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Stats | Byte Business{% endblock %}
+
+{% block content %}
+<div class="container">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h2>Platform Stats</h2>
+        <p>General activity totals across Byte Business.</p>
+      </div>
+      <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Back to businesses</a>
+    </div>
+
+    <div class="info-grid">
+      <div class="stat">
+        <span class="muted">Total users</span>
+        <strong>{{ total_users }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">Total businesses</span>
+        <strong>{{ total_businesses }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">Total reviews</span>
+        <strong>{{ total_reviews }}</strong>
+      </div>
+      <div class="stat">
+        <span class="muted">Your reviews</span>
+        <strong>{{ current_user.reviews|length }}</strong>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 1rem;">
+      <h3 style="margin-top: 0;">Quick Snapshot</h3>
+      <p class="muted" style="margin: 0.25rem 0 0;">
+        There are currently {{ total_reviews }} total reviews spread across {{ total_businesses }} businesses.
+      </p>
+      <p class="muted" style="margin: 0.35rem 0 0;">
+        Average reviews per business: {{ (total_reviews / total_businesses)|round(1) if total_businesses > 0 else 0 }}.
+      </p>
+    </div>
+  </section>
+</div>
+{% endblock %}

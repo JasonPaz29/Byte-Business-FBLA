@@ -15,6 +15,7 @@ class User(db.Model, UserMixin):
     verified_at = db.Column(db.DateTime, default=None)
     last_verification_email_sent_at = db.Column(db.DateTime, default=None)
     is_admin = db.Column(db.Boolean, default=False)
+    is_active = db.Column(db.Boolean, default=True)
 
     bookmarks = db.relationship("BookMark", back_populates="user", cascade="all, delete-orphan")
     reviews = db.relationship("Review", back_populates="user", cascade="all, delete-orphan")
@@ -29,6 +30,7 @@ class Business(db.Model):
     category = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
 
     website = db.Column(db.String(300), nullable=True)
     contact = db.Column(db.String(50), nullable=True)
@@ -50,6 +52,7 @@ class Review(db.Model):
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_visible = db.Column(db.Boolean, default=True)
 
     user = db.relationship("User", back_populates="reviews")
     business = db.relationship("Business", back_populates="reviews")
@@ -123,3 +126,4 @@ class ReviewImage(db.Model):
     uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     review = db.relationship("Review", back_populates="review_images")
+    

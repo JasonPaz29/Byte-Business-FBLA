@@ -133,10 +133,14 @@ def login():
         identifier = request.form.get("identifier", "").strip()
         password = request.form.get("password", "")
         user = User.query.filter(or_(User.username == identifier, User.email.ilike(identifier))).first()
-        if user and check_password_hash(user.password, password):
+        if user and check_password_hash(user.password, password) and user.is_active:
             login_user(user)
             flash("Logged in successfully.", "success")
             return redirect(url_for("main.list_businesses"))
-        flash("Incorrect Username/Email or Password", "error")
+        elif not user.is_active:
+            flash("Your account is inactive. Please contact support.", "error")
+            return redirect(url_for("auth.login"))
 
+        flash("Incorrect Username/Email or Password", "error")
+        
     return render_template("auth/login.html")

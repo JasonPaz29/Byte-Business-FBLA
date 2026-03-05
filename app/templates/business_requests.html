@@ -9,7 +9,7 @@
         <h2>Business Request Queue</h2>
         <p>Review incoming submissions and approve or decline with notes.</p>
       </div>
-      <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Back to businesses</a>
+      <a class="button subtle" href="{{ url_for('admin.admin_dashboard') }}">Back to dashboard</a>
     </div>
 
     {% if requests and requests|length > 0 %}
@@ -70,13 +70,13 @@
 
         {% if req.is_active %}
         <div class="divider"></div>
-        <form method="POST" action="{{ url_for('main.approve_business_request', request_id=req.id) }}">
+        <form method="POST" action="{{ url_for('admin.approve_business_request', request_id=req.id) }}">
           <label for="approve-notes-{{ req.id }}">Approval notes</label>
           <textarea id="approve-notes-{{ req.id }}" name="notes" rows="2" placeholder="Optional decision notes"></textarea>
           <button class="button" type="submit" style="margin-top: 0.5rem;">Approve request</button>
         </form>
 
-        <form method="POST" action="{{ url_for('main.decline_business_request', request_id=req.id) }}" style="margin-top: 0.75rem;">
+        <form method="POST" action="{{ url_for('admin.decline_business_request', request_id=req.id) }}" style="margin-top: 0.75rem;">
           <label for="decline-notes-{{ req.id }}">Decline notes</label>
           <textarea id="decline-notes-{{ req.id }}" name="notes" rows="2" placeholder="Optional admin notes"></textarea>
 

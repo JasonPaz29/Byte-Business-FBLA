@@ -67,7 +67,7 @@ def home():
 @main_bp.route('/businesses')
 @login_required
 def list_businesses():
-    businesses = Business.query.all()
+    businesses = Business.query.filter_by(is_active=True).all()
     recommended = recommended_businesses(current_user, businesses)
     for r in recommended:
         print(f"Recommended: {r.name} - Avg Rating: {r.average_rating()}")
@@ -77,7 +77,10 @@ def list_businesses():
 @login_required
 def business_detail(business_id):
     business = Business.query.get_or_404(business_id)
-    reviews = Review.query.filter_by(business_id=business.id).all()
+    if not business.is_active:
+        flash("This business is no longer active.", "error")
+        return redirect(url_for("main.list_businesses"))
+    reviews = Review.query.filter_by(business_id=business.id, is_visible=True).all()
     return render_template('business_detail.html', business=business, reviews=reviews)
 
 @main_bp.route('/businesses/<int:business_id>/review', methods=["POST"])
@@ -261,69 +264,11 @@ def user_business_requests():
     requests = BusinessRequest.query.filter_by(user_id=current_user.id).order_by(BusinessRequest.created_at.desc()).all()
     return render_template("user_business_requests.html", requests=requests)
 
-@main_bp.route("/business-requests/admin", methods=["GET"])
-@login_required
-def business_requests_admin():
-    if not current_user.is_admin:
-        flash("You do not have permission to view that page.", "error")
-        return redirect(url_for("main.list_businesses"))
-    requests = BusinessRequest.query.order_by(BusinessRequest.created_at.desc()).all()
-    return render_template("business_requests.html", requests=requests)
 
-@main_bp.route("/business-requests/<int:request_id>/approve", methods=["POST"])
+@main_bp.route("/stats")
 @login_required
-def approve_business_request(request_id):
-    if not current_user.is_admin:
-        flash("You do not have permission to perform that action.", "error")
-        return redirect(url_for("main.list_businesses"))
-    business_request = BusinessRequest.query.get_or_404(request_id)
-    if business_request.is_active == False and business_request.reviewed_at is not None:
-        flash("This business request has already been reviewed.", "error")
-        return redirect(url_for("main.business_requests_admin"))
-    notes = request.form.get("notes")
-    existing_business = Business.query.filter(
-        Business.name.ilike(business_request.business_name),
-        Business.location.ilike(business_request.location)
-    ).first()
-    if existing_business:
-        flash("That business already exists in the directory.", "error")
-        return redirect(url_for("main.business_requests_admin"))
-    business = Business(
-        name=business_request.business_name,
-        location=business_request.location,
-        address=business_request.address,
-        category=business_request.category,
-        description=business_request.description,
-        website=business_request.website,
-        contact=business_request.contact,
-        hours=business_request.hours
-    )
-    db.session.add(business)
-    business_request.decision_notes = notes
-    business_request.reviewed_at = datetime.utcnow()
-    business_request.is_active = False
-    db.session.commit()
-    flash("The business has been successfully created.", "success")
-    return redirect(url_for("main.list_businesses"))
-
-@main_bp.route("/business-requests/<int:request_id>/decline", methods=["POST"])
-@login_required
-def decline_business_request(request_id):
-    if not current_user.is_admin:
-        flash("You are not allowed to make this decision!", "error")
-        return redirect(url_for("main.list_businesses"))
-    
-    business_request = BusinessRequest.query.get_or_404(request_id)
-    if business_request.is_active == False and business_request.reviewed_at is not None:
-        flash("This business request has already been reviewed.", "error")
-        return redirect(url_for("main.business_requests_admin"))
-    notes = request.form.get("notes")
-    reason_declined = request.form.get("reason_declined")
-    
-    business_request.decision_notes = notes
-    business_request.reason_declined = reason_declined
-    business_request.reviewed_at = datetime.utcnow()
-    business_request.is_active = False
-    db.session.commit()
-    flash("The business request has been successfully declined.", "success")
-    return redirect(url_for("main.business_requests_admin"))
+def stats():
+    total_users = User.query.count()
+    total_businesses = Business.query.count()
+    total_reviews = Review.query.count()
+    return render_template("stats.html", total_users=total_users, total_businesses=total_businesses, total_reviews=total_reviews)
