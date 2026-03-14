@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Manage Deals | Byte Business{% endblock %}
+
+{% block content %}
+<div class="page-shell owner-page">
+  <div class="container">
+    <section class="hero-panel hero-panel-compact fade-up">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Owner tools</span>
+        <h1>Manage deals for {{ business.name|default('business') }}</h1>
+        <p>Add new promotions and remove deals that should no longer be visible.</p>
+      </div>
+      <div class="page-actions">
+        <a class="button subtle" href="{{ url_for('owner.owner_dashboard', business_id=business.id|default(0)) }}">Back to dashboard</a>
+      </div>
+    </section>
+
+    <section class="section fade-up">
+      <div class="detail-grid">
+        <article class="surface-card review-form-surface">
+          <div class="section-header modern-header compact-header">
+            <div>
+              <span class="section-kicker">Create offer</span>
+              <h2>Add a deal</h2>
+              <p>All fields are required by the current route.</p>
+            </div>
+          </div>
+          <form method="POST" action="{{ url_for('owner.owner_add_deals', business_id=business.id|default(0)) }}" class="form-grid">
+            <div>
+              <label for="deal_title">Deal title</label>
+              <input id="deal_title" name="deal_title" type="text" placeholder="Free pastry with any drink" required>
+            </div>
+            <div>
+              <label for="deal_expiry">Expiry date</label>
+              <input id="deal_expiry" name="deal_expiry" type="date" required>
+            </div>
+            <div>
+              <label for="deal_description">Deal description</label>
+              <textarea id="deal_description" name="deal_description" rows="4" placeholder="Describe the deal and how it applies." required></textarea>
+            </div>
+            <button class="button" type="submit">Add deal</button>
+          </form>
+        </article>
+
+        <article class="surface-card review-surface">
+          <div class="section-header modern-header compact-header">
+            <div>
+              <span class="section-kicker">Current offers</span>
+              <h2>Existing deals</h2>
+            </div>
+          </div>
+
+          {% if business.deals and business.deals|length > 0 %}
+          <div class="deal-stack">
+            {% for deal in business.deals %}
+            {% set deal_end = deal.end_date.strftime('%m-%d-%Y') if deal.end_date is defined and deal.end_date and deal.end_date is not string else deal.end_date|default('—') %}
+            <div class="deal-card">
+              <div class="toolbar-split">
+                <h3>{{ deal.title|default('Deal') }}</h3>
+                <span class="metric-chip">Ends {{ deal_end }}</span>
+              </div>
+              <p class="muted">{{ deal.description|default('No description provided.') }}</p>
+              <div class="review-actions">
+                <form method="POST" action="{{ url_for('owner.owner_delete_deal', business_id=business.id|default(0), deal_id=deal.id|default(0)) }}" class="review-action-form">
+                  <button class="button danger" type="submit">Delete deal</button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="empty-state-modern">
+            <h3>No deals yet</h3>
+            <p class="muted">Use the form to create the first active offer for this business.</p>
+          </div>
+          {% endif %}
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

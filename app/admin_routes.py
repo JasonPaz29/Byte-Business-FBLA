@@ -40,10 +40,12 @@ def approve_business_request(request_id):
         location=business_request.location,
         address=business_request.address,
         category=business_request.category,
+        logo_url=business_request.logo_url,
         description=business_request.description,
         website=business_request.website,
         contact=business_request.contact,
-        hours=business_request.hours
+        hours=business_request.hours,
+        owner_id=business_request.user_id
     )
     db.session.add(business)
     business_request.decision_notes = notes
@@ -95,7 +97,7 @@ def admin_dashboard():
         business_requests=business_requests
     )
 
-@admin_bp.route("/reviews/<int:review_id>/admin-hide", methods=["POST"])
+@admin_bp.route("/reviews/<int:review_id>/admin-hide", methods=["GET", "POST"])
 @login_required
 def admin_hide_review(review_id):
     review = Review.query.get_or_404(review_id)
@@ -105,6 +107,9 @@ def admin_hide_review(review_id):
     review.is_visible = False
     db.session.commit()
     flash("The review has been successfully hidden.", "success")
+    next_page = request.args.get("next")
+    if next_page:
+        return redirect(next_page)
     return redirect(url_for("admin.admin_dashboard"))
 
 @admin_bp.route("/reviews/<int:review_id>/admin-show", methods=["POST"])
@@ -117,6 +122,9 @@ def admin_show_review(review_id):
     review.is_visible = True
     db.session.commit()
     flash("The review is now visible.", "success")
+    next_page = request.args.get("next")
+    if next_page:
+        return redirect(next_page)
     return redirect(url_for("admin.admin_dashboard"))
     
 @admin_bp.route("/admin-deactivate-user/<int:user_id>", methods=["POST"])
@@ -154,6 +162,9 @@ def admin_deactivate_business(business_id):
     business.is_active = False
     db.session.commit()
     flash("The business has been successfully deactivated.", "success")
+    next_page = request.args.get("next")
+    if next_page:
+        return redirect(next_page)
     return redirect(url_for("admin.admin_dashboard"))
 
 
@@ -167,4 +178,7 @@ def admin_activate_business(business_id):
     business.is_active = True
     db.session.commit()
     flash("The business has been successfully activated.", "success")
+    next_page = request.args.get("next")
+    if next_page:
+        return redirect(next_page)
     return redirect(url_for("admin.admin_dashboard"))

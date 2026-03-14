@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, render_template, url_for, send_file, flash
+from flask import Blueprint, redirect, render_template, url_for, send_file, flash, request
 from flask_login import login_required, current_user
 from app.bookmark_services import add_bookmark, remove_bookmark
 from app.generate_pdf import generate_bookmark_report
@@ -16,6 +16,9 @@ def bookmark(business_id):
 @login_required
 def unbookmark(business_id):
     remove_bookmark(current_user.id, business_id=business_id)
+    next_page = request.args.get("next")
+    if next_page:
+        return redirect(next_page)
     flash("Bookmark removed.", "success")
     return redirect(url_for("bookmarks.view_bookmarks"))
 

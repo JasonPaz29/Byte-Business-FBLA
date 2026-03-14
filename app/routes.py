@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from .extensions import db
-from .models import User, Business, Review, BusinessRequest, ReviewImage
+from .models import User, Business, Review, BusinessRequest, ReviewImage, ReviewLike
 from sqlalchemy import or_
 from flask_login import login_required, current_user
 from .recommendations import recommended_businesses
@@ -26,6 +26,7 @@ def submit_request(user):
     website = request.form.get('website', '').strip()
     contact = request.form.get('contact', '').strip()
     hours = request.form.get('hours', '').strip()
+    logo_url = request.form.get('logo_url', '').strip()
 
     if not business_name or not location or not address or not category:
         return False, "Please fill out all required fields."
@@ -43,6 +44,7 @@ def submit_request(user):
         location=location,
         address=address,
         category=category,
+        logo_url=logo_url or None,
         description=description or None,
         website=website or None,
         contact=contact or None,
@@ -67,20 +69,24 @@ def home():
 @main_bp.route('/businesses')
 @login_required
 def list_businesses():
-    businesses = Business.query.filter_by(is_active=True).all()
+    if current_user.is_admin:
+        businesses = Business.query.all()
+    else:
+        businesses = Business.query.filter_by(is_active=True).all()
     recommended = recommended_businesses(current_user, businesses)
-    for r in recommended:
-        print(f"Recommended: {r.name} - Avg Rating: {r.average_rating()}")
     return render_template('businesses.html', businesses=businesses, recommended=recommended)
 
 @main_bp.route('/businesses/<int:business_id>', methods=['GET'])
 @login_required
 def business_detail(business_id):
     business = Business.query.get_or_404(business_id)
-    if not business.is_active:
+    if not current_user.is_admin and not business.is_active:
         flash("This business is no longer active.", "error")
         return redirect(url_for("main.list_businesses"))
-    reviews = Review.query.filter_by(business_id=business.id, is_visible=True).all()
+    if current_user.is_admin:
+        reviews = Review.query.filter_by(business_id=business.id).all()
+    else:
+        reviews = Review.query.filter_by(business_id=business.id, is_visible=True).all()
     return render_template('business_detail.html', business=business, reviews=reviews)
 
 @main_bp.route('/businesses/<int:business_id>/review', methods=["POST"])
@@ -272,3 +278,27 @@ def stats():
     total_businesses = Business.query.count()
     total_reviews = Review.query.count()
     return render_template("stats.html", total_users=total_users, total_businesses=total_businesses, total_reviews=total_reviews)
+
+@main_bp.route("/reviews/<int:review_id>/like", methods=["POST"])
+@login_required
+def like_review(review_id):
+    review = Review.query.get_or_404(review_id)
+    if not review.is_visible and not current_user.is_admin:
+        flash("That review is not available.", "error")
+        return redirect(url_for("main.list_businesses"))
+    if review.user_id == current_user.id:
+        flash("You cannot like your own review.", "error")
+        return redirect(url_for("main.business_detail", business_id=review.business_id))
+    
+    existing_like = ReviewLike.query.filter_by(user_id=current_user.id, review_id=review.id).first()
+    if existing_like:
+        db.session.delete(existing_like)
+        db.session.commit()
+        flash("You have unliked the review.", "success")
+    else:
+        new_like = ReviewLike(user_id=current_user.id, review_id=review.id)
+        db.session.add(new_like)
+        db.session.commit()
+        flash("You have liked the review.", "success")
+    
+    return redirect(url_for("main.business_detail", business_id=review.business_id))

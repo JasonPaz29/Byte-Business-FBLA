@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Business Stats | Byte Business{% endblock %}
+
+{% block content %}
+<div class="page-shell owner-page">
+  <div class="container">
+    <section class="hero-panel hero-panel-compact fade-up">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Owner analytics</span>
+        <h1>{{ business.name|default('Business') }} stats</h1>
+        <p>Quick metrics for review volume, rating health, and active deals.</p>
+      </div>
+      <div class="page-actions">
+        <a class="button subtle" href="{{ url_for('owner.owner_dashboard', business_id=business.id|default(0)) }}">Back to dashboard</a>
+      </div>
+    </section>
+
+    <section class="section fade-up">
+      <div class="stats-grid admin-stats-grid">
+        <article class="stats-panel">
+          <span class="stats-label">Total reviews</span>
+          <strong>{{ total_reviews }}</strong>
+          <p>All reviews associated with this business.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Average rating</span>
+          <strong>{{ business.average_rating() if business.average_rating() is not none else '—' }}</strong>
+          <p>Current average across submitted reviews.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Visible reviews</span>
+          <strong>{{ business.reviews|selectattr('is_visible', 'equalto', True)|list|length }}</strong>
+          <p>Reviews currently visible to non-admin users.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Deals</span>
+          <strong>{{ business.deals|length if business.deals is not none else 0 }}</strong>
+          <p>Deals currently attached to the business.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section fade-up">
+      <div class="surface-grid surface-grid--2">
+        <article class="surface-card">
+          <h3>Business information</h3>
+          <div class="request-meta-list">
+            <p class="muted"><strong>Location:</strong> {{ business.location|default('—') }}</p>
+            <p class="muted"><strong>Address:</strong> {{ business.address|default('—') }}</p>
+            <p class="muted"><strong>Category:</strong> {{ business.category|default('—') }}</p>
+            <p class="muted"><strong>Contact:</strong> {{ business.contact|default('—') }}</p>
+          </div>
+        </article>
+
+        <article class="surface-card">
+          <h3>What this page covers</h3>
+          <p class="muted">This route currently passes total reviews and the business object only, so these stats are intentionally limited to those available fields.</p>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

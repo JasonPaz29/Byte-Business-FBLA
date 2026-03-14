@@ -2,80 +2,78 @@
 {% block title %}Help | Byte Business{% endblock %}
 
 {% block content %}
-<div class="container">
-  <section class="section">
-    <div class="section-header">
-      <div>
-        <h2>Help center</h2>
-        <p>Quick guidance for ratings, bookmarks, and deals.</p>
+<div class="page-shell">
+  <div class="container">
+    <section class="hero-panel hero-panel-compact fade-up">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Support</span>
+        <h1>Help center</h1>
+        <p>Use this page as the quick reference for reviews, bookmarks, business claims, and deals.</p>
       </div>
-      <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Browse businesses</a>
-    </div>
+      <div class="page-actions">
+        <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Browse businesses</a>
+      </div>
+    </section>
 
-    <div class="grid-two">
-      <div class="card">
-        <h3>Rate a business</h3>
-        <ul class="list">
-          <li>Open a business detail page from the Businesses list.</li>
-          <li>Choose a rating from 1-5 and add a short comment if you want.</li>
-          <li>Submit your review (email verification is required).</li>
-        </ul>
+    <section class="section fade-up">
+      <div class="surface-grid surface-grid--2">
+        <article class="surface-card">
+          <h3>Rate a business</h3>
+          <ul class="list compact-list">
+            <li>Open a business detail page from the directory.</li>
+            <li>Select a rating from 1 to 5 and add a comment if needed.</li>
+            <li>Submit the review once your email is verified.</li>
+          </ul>
+        </article>
+        <article class="surface-card">
+          <h3>Edit or remove a review</h3>
+          <ul class="list compact-list">
+            <li>Find your review on the business detail page.</li>
+            <li>Use the edit action to change the rating or comment.</li>
+            <li>Use delete if the review should be removed entirely.</li>
+          </ul>
+        </article>
+        <article class="surface-card">
+          <h3>Use bookmarks</h3>
+          <ul class="list compact-list">
+            <li>Bookmark a business from the business detail page.</li>
+            <li>Open Bookmarks from the navigation to revisit saved places.</li>
+            <li>Export your bookmark list to PDF when needed.</li>
+          </ul>
+        </article>
+        <article class="surface-card">
+          <h3>Claim a business</h3>
+          <ul class="list compact-list">
+            <li>Submit a business claim from the businesses page.</li>
+            <li>Track approval status from your request history.</li>
+            <li>Admins can approve or reject with notes.</li>
+          </ul>
+        </article>
+        <article class="surface-card">
+          <h3>Search and filter</h3>
+          <ul class="list compact-list">
+            <li>Use search to find names, locations, or categories.</li>
+            <li>Sort by rating or name to scan faster.</li>
+            <li>Filter by category to narrow down the grid.</li>
+          </ul>
+        </article>
+        <article class="surface-card">
+          <h3>Redeem deals</h3>
+          <ul class="list compact-list">
+            <li>Open the business detail page and locate the deals section.</li>
+            <li>Redeem the offer directly from the available deal card.</li>
+            <li>Redeemed deals are marked so they are easy to track.</li>
+          </ul>
+        </article>
       </div>
 
-      <div class="card">
-        <h3>Edit or remove your review</h3>
-        <ul class="list">
-          <li>Find your review on the business detail page.</li>
-          <li>Use the "Edit review" link to update your rating or comment.</li>
-          <li>Changes show up right away after saving.</li>
-        </ul>
+      <div class="promo-band">
+        <div>
+          <h3>Still blocked?</h3>
+          <p class="muted">If something behaves incorrectly, sign out, sign back in, and retry the flow. If it still fails, contact the site administrator.</p>
+        </div>
       </div>
-    </div>
-
-    <div class="grid-two" style="margin-top: 1rem;">
-      <div class="card">
-        <h3>Use bookmarks</h3>
-        <ul class="list">
-          <li>Click the ribbon on a business page to add or remove a bookmark.</li>
-          <li>Visit Bookmarks in the navigation to see your saved businesses.</li>
-          <li>Select “View business” to jump back to details quickly.</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>Download bookmark reports</h3>
-        <ul class="list">
-          <li>Open your Bookmarks page.</li>
-          <li>Choose "Download PDF" to export your saved list.</li>
-          <li>Use the report for offline notes or sharing.</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="grid-two" style="margin-top: 1rem;">
-      <div class="card">
-        <h3>Search and filter businesses</h3>
-        <ul class="list">
-          <li>Use the search bar to find a business by name or location.</li>
-          <li>Filter by type to narrow the list.</li>
-          <li>Sort by rating or name for faster browsing.</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <h3>Redeem deals</h3>
-        <ul class="list">
-          <li>Open a business detail page and find the Deals section.</li>
-          <li>Press "Redeem deal" to claim an offer.</li>
-          <li>Redeemed deals show as completed on the page.</li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top: 1rem;">
-      <h3>Need more help?</h3>
-      <p class="muted">If something does not look right, log out and back in, then try again. You can also reach out to the site admin for support.</p>
-    </div>
-  </section>
+    </section>
+  </div>
 </div>
 {% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Edit Business | Byte Business{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <div class="container request-form-layout fade-up">
+    <section class="hero-panel hero-panel-compact">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Owner tools</span>
+        <h1>Edit {{ business.name|default('business') }}</h1>
+        <p>Update the public information shown across the directory and detail page.</p>
+      </div>
+      <div class="page-actions">
+        <a class="button subtle" href="{{ url_for('owner.owner_dashboard', business_id=business.id|default(0)) }}">Back to dashboard</a>
+      </div>
+    </section>
+
+    <div class="surface-card form-surface">
+      <form method="POST" action="{{ url_for('owner.edit_business', business_id=business.id|default(0)) }}" class="form-grid form-grid--two">
+        <div>
+          <label for="name">Business name</label>
+          <input id="name" name="name" type="text" value="{{ business.name|default('') }}" required>
+        </div>
+        <div>
+          <label for="location">Location</label>
+          <input id="location" name="location" type="text" value="{{ business.location|default('') }}" required>
+        </div>
+        <div>
+          <label for="address">Address</label>
+          <input id="address" name="address" type="text" value="{{ business.address|default('') }}" required>
+        </div>
+        <div>
+          <label for="category">Category</label>
+          <input id="category" name="category" type="text" value="{{ business.category|default('') }}" required>
+        </div>
+        <div class="form-span-full">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="4">{{ business.description|default('') }}</textarea>
+        </div>
+        <div>
+          <label for="website">Website</label>
+          <input id="website" name="website" type="url" value="{{ business.website|default('') }}">
+        </div>
+        <div>
+          <label for="contact">Contact</label>
+          <input id="contact" name="contact" type="text" value="{{ business.contact|default('') }}">
+        </div>
+        <div class="form-span-full">
+          <label for="hours">Hours</label>
+          <input id="hours" name="hours" type="text" value="{{ business.hours|default('') }}">
+        </div>
+        <div class="form-span-full form-footer-row">
+          <p class="muted form-note">Changes are saved immediately after submit.</p>
+          <button class="button" type="submit">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

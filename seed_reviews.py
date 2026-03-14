@@ -2,7 +2,7 @@ import random
 from datetime import datetime, timedelta
 from app import create_app
 from app.extensions import db
-from app.models import Review, User, Business
+from app.models import Review, User, Business, ReviewLike
 
 REVIEW_TEMPLATES = {
     5: [
@@ -32,7 +32,7 @@ REVIEW_TEMPLATES = {
     ],
 }
 
-def seed_reviews(min_reviews=1, max_reviews=7, chance_of_review=0.85):
+def seed_reviews(min_reviews=1, max_reviews=7, chance_of_review=0.85, min_likes=2, max_likes=10, chance_of_like=0.57):
     users = User.query.all()
     businesses = Business.query.all()
     created = 0
@@ -55,12 +55,23 @@ def seed_reviews(min_reviews=1, max_reviews=7, chance_of_review=0.85):
             )
             db.session.add(review)
             created += 1
+            db.session.flush()  # Get review.id before commit
+            # Add likes to the review
+            if random.random() < chance_of_like:
+                num_likes = random.randint(min_likes, max_likes)
+                likers = random.sample(users, k=min(num_likes, len(users)))
+                for liker in likers:
+                    if liker.id != user.id:  # Prevent self-likes
+                        like = ReviewLike(user_id=liker.id, review_id=review.id)
+                        db.session.add(like)
     db.session.commit()
     print(f"✅ Created {created} new reviews for {len(businesses)} businesses")
 def clear_reviews():
+    deleted_likes = ReviewLike.query.delete()
     deleted = Review.query.delete()
     db.session.commit()
     print(f"🧹 Deleted {deleted} existing reviews")
+    print(f"🧹 Deleted {deleted_likes} existing review likes")
     
 if __name__ == "__main__":
     app = create_app()

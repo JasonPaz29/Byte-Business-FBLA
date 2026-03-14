@@ -2,116 +2,74 @@
 {% block title %}Byte Business | Home{% endblock %}
 
 {% block content %}
-<div class="container">
-  <section class="hero">
-    <div>
-      <span class="eyebrow">Ratings made simple</span>
-      <h1>A calm place to share quick ratings.</h1>
-      <p>Byte Business keeps feedback tidy so people can see what matters—clear scores, short notes, and zero noise.</p>
-      <div class="hero-actions">
-        <a class="button" href="{{ url_for('auth.register') }}">Create account</a>
-        <a class="button subtle" href="{{ url_for('auth.login') }}">Log in</a>
-        <span class="subtext">No ads. No clutter. Just signal.</span>
-      </div>
-      <div class="mini-grid" style="margin-top: 1.1rem;">
-        <div class="neutral-card">
-          <span class="stars">★★★★☆</span>
-          <span>Service quality</span>
-        </div>
-        <div class="neutral-card">
-          <span class="stars">★★★★★</span>
-          <span>Response speed</span>
+<div class="page-shell home-page">
+  <div class="container">
+    <section class="hero-panel hero-panel-home fade-up">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Community-first local discovery</span>
+        <h1>Discover trusted businesses, save the best ones, and leave useful reviews without the clutter.</h1>
+        <p>Byte Business gives users a cleaner way to compare local options, track favorites, and surface real feedback that is easy to scan.</p>
+        <div class="page-actions">
+          {% if current_user.is_authenticated %}
+          <a class="button" href="{{ url_for('main.list_businesses') }}">Browse businesses</a>
+          <a class="button subtle" href="{{ url_for('main.stats') }}">View stats</a>
+          {% else %}
+          <a class="button" href="{{ url_for('auth.register') }}">Create account</a>
+          <a class="button subtle" href="{{ url_for('auth.login') }}">Log in</a>
+          {% endif %}
         </div>
       </div>
-    </div>
-    <div class="card">
-      <div class="rating-card">
-        <span class="tag">Latest ratings</span>
-        <div class="row">
-          <div>
-            <div class="stars">★★★★★</div>
-            <p style="margin: 0;">"On-time updates and friendly check-ins."</p>
-          </div>
-          <span class="pill">Project support</span>
-        </div>
-        <div class="row">
-          <div>
-            <div class="stars">★★★★☆</div>
-            <p style="margin: 0;">"Clean deliverables, could iterate faster."</p>
-          </div>
-          <span class="pill">Design review</span>
-        </div>
-        <div class="row">
-          <div>
-            <div class="stars">★★★★★</div>
-            <p style="margin: 0;">"Clear communication and next steps."</p>
-          </div>
-          <span class="pill">Client call</span>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="section">
-    <div class="section-header">
-      <h2>What makes this different</h2>
-      <p>Built to feel like a casual scorecard with professional clarity.</p>
-    </div>
-    <div class="card-grid">
-      <div class="card">
-        <h3>Quick scoring</h3>
-        <p>Drop a score and a short note—no long forms, no shouting into the void.</p>
+      <div class="hero-panel-side">
+        <div class="hero-highlight-card">
+          <span class="stats-label">What users can do</span>
+          <ul class="list compact-list">
+            <li>Review local businesses with quick ratings.</li>
+            <li>Bookmark places worth revisiting.</li>
+            <li>Track deals, activity, and business claims.</li>
+          </ul>
+        </div>
       </div>
-      <div class="card">
-        <h3>Neutral look</h3>
-        <p>A low-color layout that keeps attention on the ratings, not the interface.</p>
-      </div>
-      <div class="card">
-        <h3>Trustable flow</h3>
-        <p>Login and register are straightforward so people feel comfortable leaving honest takes.</p>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <section class="section">
-    <div class="section-header">
-      <h2>Recent highlights</h2>
-      <p>Examples of the tone and brevity we aim for.</p>
-    </div>
-    <div class="card-grid">
-      <div class="card">
-        <div class="row">
-          <h3 style="margin: 0;">Product handoff</h3>
-          <span class="stars">★★★★★</span>
+    <section class="section fade-up">
+      <div class="section-header modern-header">
+        <div>
+          <span class="section-kicker">Core experience</span>
+          <h2>Built for fast trust signals</h2>
+          <p>The product stays focused on the actions that matter most to users and local businesses.</p>
         </div>
-        <p>"Handed off clean files and answers in one email."</p>
       </div>
-      <div class="card">
-        <div class="row">
-          <h3 style="margin: 0;">Follow-up care</h3>
-          <span class="stars">★★★★☆</span>
-        </div>
-        <p>"Polite check-ins, could add more context on next steps."</p>
-      </div>
-      <div class="card">
-        <div class="row">
-          <h3 style="margin: 0;">Support desk</h3>
-          <span class="stars">★★★★☆</span>
-        </div>
-        <p>"Fast replies, minor delays during weekends."</p>
-      </div>
-    </div>
-  </section>
 
-  <section class="cta">
-    <div>
-      <h3>Ready to leave or collect ratings?</h3>
-      <p>Keep feedback concise and easy to skim.</p>
-    </div>
-    <div class="hero-actions">
-      <a class="button" href="{{ url_for('auth.register') }}">Create account</a>
-      <a class="button subtle" href="{{ url_for('auth.login') }}">Log in</a>
-    </div>
-  </section>
+      <div class="surface-grid surface-grid--3">
+        <article class="surface-card">
+          <h3>Business discovery</h3>
+          <p class="muted">Browse by category, rating, or location with a cleaner directory layout.</p>
+        </article>
+        <article class="surface-card">
+          <h3>Review management</h3>
+          <p class="muted">Leave, edit, and manage your own reviews with image support and moderation.</p>
+        </article>
+        <article class="surface-card">
+          <h3>Admin oversight</h3>
+          <p class="muted">Review business claims, moderate content, and keep platform quality under control.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section fade-up">
+      <div class="promo-band">
+        <div>
+          <span class="section-kicker">Next step</span>
+          <h3>Start with the business directory and work from there.</h3>
+          <p class="muted">That is the center of the product. Reviews, bookmarks, claims, and stats all connect back to it.</p>
+        </div>
+        <div class="page-actions">
+          <a class="button" href="{{ url_for('main.list_businesses') }}">Open directory</a>
+          <a class="button subtle" href="{{ url_for('main.help') }}">Help center</a>
+        </div>
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}

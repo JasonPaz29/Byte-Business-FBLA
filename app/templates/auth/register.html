@@ -57,42 +57,44 @@
 {% endblock %}
 
 {% block content %}
-<div class="container auth-layout">
-  <div class="auth-card">
-    <h1>Create your account</h1>
-    <p>Join to share quick ratings and keep notes in one calm place.</p>
-    <form method="POST" action="{{ url_for('auth.register') }}" data-register-form>
-      
-      <div>
-        <label for="username">Username</label>
-        <input id="username" name="username" type="text" placeholder="Your username" required>
-      </div>
-      <div>
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" placeholder="you@example.com" required>
-      </div>
-      <div>
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" placeholder="Create a password" required>
-      </div>
-      <div>
-        <label>Verification</label>
-        <div
-          class="cf-turnstile"
-          data-sitekey="{{ turnstile_site_key }}"
-          data-theme="light"
-          data-callback="handleTurnstile"
-          data-expired-callback="handleTurnstileExpired"
-          data-error-callback="handleTurnstileError"
-        ></div>
-        {% if not turnstile_site_key %}
-        <p class="muted" style="margin: 0.35rem 0 0;">Turnstile site key missing. Add <code>TURNSTILE_SITE_KEY</code> to your config/env to enable verification.</p>
-        {% endif %}
-        <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">
-      </div>
-      <button class="button" type="submit" data-submit>Register</button>
-    </form>
-    <p class="muted" style="margin-top: 1rem;">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>.</p>
+<div class="page-shell">
+  <div class="container auth-layout fade-up">
+    <div class="auth-card">
+      <span class="section-kicker">Create account</span>
+      <h1>Create your account</h1>
+      <p>Join Byte Business to leave reviews, bookmark businesses, and submit business claims.</p>
+      <form method="POST" action="{{ url_for('auth.register') }}" data-register-form>
+        <div>
+          <label for="username">Username</label>
+          <input id="username" name="username" type="text" placeholder="Your username" required>
+        </div>
+        <div>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div>
+          <label for="password">Password</label>
+          <input id="password" name="password" type="password" placeholder="Create a password" required>
+        </div>
+        <div>
+          <label>Verification</label>
+          <div
+            class="cf-turnstile"
+            data-sitekey="{{ turnstile_site_key }}"
+            data-theme="light"
+            data-callback="handleTurnstile"
+            data-expired-callback="handleTurnstileExpired"
+            data-error-callback="handleTurnstileError"
+          ></div>
+          {% if not turnstile_site_key %}
+          <p class="muted turnstile-note">Turnstile site key missing. Add <code>TURNSTILE_SITE_KEY</code> to your config or environment.</p>
+          {% endif %}
+          <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">
+        </div>
+        <button class="button" type="submit" data-submit>Register</button>
+      </form>
+      <p class="muted auth-meta">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>.</p>
+    </div>
   </div>
 </div>
 {% endblock %}

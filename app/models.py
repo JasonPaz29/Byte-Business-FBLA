@@ -21,15 +21,18 @@ class User(db.Model, UserMixin):
     reviews = db.relationship("Review", back_populates="user", cascade="all, delete-orphan")
     redeemed_deals = db.relationship("RedeemDeal", back_populates="user", cascade="all, delete-orphan")
     business_requests = db.relationship("BusinessRequest", back_populates="user", cascade="all, delete-orphan")
+    review_likes = db.relationship("ReviewLike", back_populates="user", cascade="all, delete-orphan")
 
 class Business(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
     location = db.Column(db.String(200), nullable=False)
+    owner_id = db.Column(db.Integer, nullable=True)
     address = db.Column(db.String(300), nullable=False)
     category = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    logo_url = db.Column(db.String(300), nullable=True)
     is_active = db.Column(db.Boolean, default=True)
 
     website = db.Column(db.String(300), nullable=True)
@@ -57,6 +60,7 @@ class Review(db.Model):
     user = db.relationship("User", back_populates="reviews")
     business = db.relationship("Business", back_populates="reviews")
     review_images = db.relationship("ReviewImage", back_populates="review", cascade="all, delete-orphan")
+    likes = db.relationship("ReviewLike", back_populates="review", cascade="all, delete-orphan")
 
 class BookMark(db.Model):
     __tablename__ = "bookmarks"
@@ -101,6 +105,7 @@ class BusinessRequest(db.Model):
     location = db.Column(db.String(200), nullable=False)
     address = db.Column(db.String(300), nullable=False)
     category = db.Column(db.String(100), nullable=False)
+    logo_url = db.Column(db.String(300), nullable=True)
     description = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -127,3 +132,14 @@ class ReviewImage(db.Model):
     
     review = db.relationship("Review", back_populates="review_images")
     
+class ReviewLike(db.Model):
+    __tablename__ = "review_likes"
+    id = db.Column(db.Integer, primary_key=True)
+    review_id = db.Column(db.Integer, db.ForeignKey("review.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    review = db.relationship("Review", back_populates="likes")
+    user = db.relationship("User", back_populates="review_likes")
+
+    __table_args__ = (db.UniqueConstraint('review_id', 'user_id', name='uq_review_user_like'),)

@@ -6,7 +6,6 @@
   'name': 'North Street Cafe',
   'type': 'Cafe',
   'rating': '4.7',
-  'stars': '★★★★★',
   'reviews': 128,
   'location': 'Seattle, WA',
   'summary': 'Relaxed spot with reliable Wi-Fi, calm music, and attentive staff. Great for casual meetups or getting work done.',
@@ -15,7 +14,6 @@
   'contact': '(206) 555-0199',
   'website': 'northstreetcafe.example.com',
   'address': '412 North Street, Seattle, WA',
-  'recent_note': '"Friendly service, easy to find a seat, and the espresso is consistent."',
   'bookmarks': [],
   'deals': [
     {'id': 1, 'title': 'Free pastry with any drink', 'description': 'Show this deal at checkout to get a complimentary pastry with any drink purchase.', 'start_date': 'Today', 'end_date': 'Sep 30', 'redeemed_deals': []},
@@ -31,192 +29,281 @@
 {% set bookmarks_for_biz = biz.bookmarks if biz.bookmarks is not none else [] %}
 {% set is_bookmarked = current_user.is_authenticated and (bookmarks_for_biz | selectattr('user_id', 'equalto', current_user.id) | list | length > 0) %}
 {% set deals_list = biz.deals if (biz.deals is defined and biz.deals|length > 0) else (sample_business.deals if (biz.id is not defined or not biz.id) else []) %}
+{% set computed_average = biz.average_rating() if (biz.average_rating is defined and biz.average_rating() is not none) else biz.rating|default('0') %}
+{% set headline_rating = computed_average %}
 
-<div class="container">
-  <section class="section">
-    <div class="card card-with-ribbon">
+<div class="page-shell business-detail-page">
+  <div class="container">
+    <section class="hero-panel detail-hero fade-up card-with-ribbon">
       <a
         class="bookmark-ribbon"
-        href="{{ url_for('bookmarks.unbookmark', business_id=biz.id|default(0)) if is_bookmarked else url_for('bookmarks.bookmark', business_id=biz.id|default(0)) }}"
+        href="{{ url_for('bookmarks.unbookmark', business_id=biz.id|default(0), next=url_for('main.business_detail', business_id=biz.id|default(0))) if is_bookmarked else url_for('bookmarks.bookmark', business_id=biz.id|default(0)) }}"
         aria-label="{{ 'Remove' if is_bookmarked else 'Add' }} {{ biz.name|default('this business') }} {{ 'from' if is_bookmarked else 'to' }} bookmarks"
       >
         <span class="ribbon-label">{{ 'Remove bookmark' if is_bookmarked else 'Add to bookmark' }}</span>
       </a>
-      <div class="row" style="align-items: flex-start;">
-        <div>
-          <span class="eyebrow">{{ biz.type|default('Business') }}</span>
-          <h1 style="margin: 0.4rem 0 0.3rem;">{{ biz.name|default('Business name') }}</h1>
-          <div class="business-meta">
-            {% set headline_rating = biz.average_rating()|default(biz.rating|default('0')) %}
+
+      <div class="detail-hero-grid">
+        <div class="hero-panel-copy">
+          <div class="detail-brand-row">
+            <div class="detail-brand-mark">
+              {% if biz.logo_url %}
+              <img src="{{ biz.logo_url }}" alt="{{ biz.name|default('Business') }} logo" loading="lazy">
+              {% else %}
+              <span>{{ biz.name[:2]|upper if biz.name else 'BB' }}</span>
+              {% endif %}
+            </div>
+            <div>
+          <span class="section-kicker">{{ biz.type|default('Business') }}</span>
+          <h1>{{ biz.name|default('Business name') }}</h1>
+            </div>
+          </div>
+          <div class="business-meta detail-meta">
             <span class="star-bar" data-rating-bar data-rating="{{ headline_rating }}">
               <span class="base">★★★★★</span>
               <span class="fill">★★★★★</span>
             </span>
-            <span>{{ biz.average_rating()|default('4.5') }} average • {{ biz.reviews|length if biz.reviews is not none else '—' }} rating(s)</span>
-            <span class="pill">{{ biz.location|default('City, State') }}</span>
+            <span>{{ computed_average|default('4.5') }} average</span>
+            <span>{{ biz.reviews|length if biz.reviews is not none else '—' }} rating(s)</span>
+            <span class="metric-chip">{{ biz.location|default('City, State') }}</span>
+          </div>
+          <p>{{ biz.description|default('Concise description goes here.') }}</p>
+          <div class="chip-row">
+            {% for tag in biz.categories|default([]) %}
+            <span class="metric-chip">{{ tag }}</span>
+            {% endfor %}
           </div>
         </div>
-        <div class="stat">
-          <strong>{{ biz.average_rating()|default('4.5') }}</strong>
-          <span class="muted">Overall rating</span>
-        </div>
-      </div>
-      <p style="margin: 0.8rem 0 1rem; color: var(--muted);">{{ biz.description|default('Concise description goes here.') }}</p>
-      <div class="inline">
-        {% for tag in biz.categories|default([]) %}
-        <span class="badge">{{ tag }}</span>
-        {% endfor %}
-      </div>
-    </div>
 
-    <div class="card" style="margin-top: 1rem;">
-      <h3 style="margin-top: 0;">Details</h3>
-      <div class="info-grid">
-        <div class="stat">
-          <span class="muted">Hours</span>
-          <strong>{{ biz.hours|default('—') }}</strong>
-        </div>
-        <div class="stat">
-          <span class="muted">Contact</span>
-          <strong>{{ biz.contact|default('—') }}</strong>
-        </div>
-        <div class="stat">
-          <span class="muted">Website</span>
-          <strong>{{ biz.website|default('—') }}</strong>
-        </div>
-        <div class="stat">
-          <span class="muted">Address</span>
-          <strong>{{ biz.address|default('—') }}</strong>
+        <div class="detail-hero-side">
+          <article class="stats-panel compact-stats-panel">
+            <span class="stats-label">Overall rating</span>
+            <strong style="color: black;">{{ computed_average|default('4.5') }}</strong>
+            <p>Based on current review activity for this business.</p>
+          </article>
+          <article class="stats-panel compact-stats-panel">
+            <span class="stats-label">Active deals</span>
+            <strong style="color: black;">{{ deals_list|length }}</strong>
+            <p>Redeemable offers currently attached to this business.</p>
+          </article>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="card" style="margin-top: 1rem;">
-      <div class="row" style="align-items: baseline;">
-        <h3 style="margin: 0;">Deals</h3>
-        <span class="pill">{{ deals_list|length }} available</span>
-      </div>
-      {% if deals_list and deals_list|length > 0 %}
-      <div class="deal-stack">
-        {% for deal in deals_list %}
-        {% set redeemed_list = deal.redeemed_deals if deal.redeemed_deals is not none else [] %}
-        {% set already_redeemed = current_user.is_authenticated and (redeemed_list | selectattr('user_id', 'equalto', current_user.id) | list | length > 0) %}
-        {% set deal_start = deal.start_date.strftime('%m-%d-%Y') if deal.start_date is not string and deal.start_date else deal.start_date|default('Now') %}
-        {% set deal_end = deal.end_date.strftime('%m-%d-%Y') if deal.end_date is not string and deal.end_date else deal.end_date|default('Soon') %}
-        <div class="deal-card">
-          <div class="row" style="align-items: baseline;">
-            <h4 style="margin: 0;">{{ deal.title|default('Limited offer') }}</h4>
-            {% if already_redeemed %}
-            <span class="pill success">Redeemed</span>
-            {% endif %}
+    <section class="section fade-up">
+      <div class="detail-grid">
+        <article class="surface-card">
+          <div class="section-header modern-header compact-header">
+            <div>
+              <span class="section-kicker">Business details</span>
+              <h2>Core information</h2>
+            </div>
           </div>
-          <p class="muted" style="margin: 0;">{{ deal.description|default('Deal details coming soon.') }}</p>
-          <div class="deal-meta">
-            <span>Starts: {{ deal_start }}</span>
-            <span>Ends: {{ deal_end }}</span>
+          <div class="info-grid">
+            <div class="stat">
+              <span class="muted">Hours</span>
+              <strong>{{ biz.hours|default('—') }}</strong>
+            </div>
+            <div class="stat">
+              <span class="muted">Contact</span>
+              <strong>{{ biz.contact|default('—') }}</strong>
+            </div>
+            <div class="stat">
+              <span class="muted">Website</span>
+              <strong>{{ biz.website|default('—') }}</strong>
+            </div>
+            <div class="stat">
+              <span class="muted">Address</span>
+              <strong>{{ biz.address|default('—') }}</strong>
+            </div>
           </div>
-          <div class="deal-actions">
-            <form method="POST" action="{{ url_for('deal.redeem_deal', business_id=biz.id|default(0), deal_id=deal.id|default(0)) }}">
-              <button class="button" type="submit" {% if already_redeemed %}disabled{% endif %}>{{ 'Already redeemed' if already_redeemed else 'Redeem deal' }}</button>
-            </form>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-      {% else %}
-      <p class="muted" style="margin: 0.2rem 0 0;">No deals posted for this business yet.</p>
-      {% endif %}
-    </div>
+        </article>
 
-    <div class="grid-two" style="margin-top: 1rem;">
-      <div class="card">
-        <h3 style="margin-top: 0;">Reviews</h3>
-        <div class="row" style="justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-          <div class="inline" style="margin: 0;">
-            <label for="review-sort" style="margin: 0;">Sort</label>
-            <select id="review-sort" name="review-sort">
-              <option value="newest_oldest" selected>Newest to Oldest</option>
-              <option value="oldest_newest">Oldest to Newest</option>
-              <option value="highest_lowest">Highest to Lowest</option>
-              <option value="lowest_highest">Lowest to Highest</option>
-            </select>
+        <article class="surface-card">
+          <div class="section-header modern-header compact-header">
+            <div>
+              <span class="section-kicker">Offers</span>
+              <h2>Deals</h2>
+            </div>
+            <span class="metric-chip">{{ deals_list|length }} available</span>
           </div>
-          <div class="row" data-review-pagination style="gap: 0.5rem;">
+          {% if deals_list and deals_list|length > 0 %}
+          <div class="deal-stack">
+            {% for deal in deals_list %}
+            {% set redeemed_list = deal.redeemed_deals if deal.redeemed_deals is not none else [] %}
+            {% set already_redeemed = current_user.is_authenticated and (redeemed_list | selectattr('user_id', 'equalto', current_user.id) | list | length > 0) %}
+            {% set deal_start = deal.start_date.strftime('%m-%d-%Y') if deal.start_date is not string and deal.start_date else deal.start_date|default('Now') %}
+            {% set deal_end = deal.end_date.strftime('%m-%d-%Y') if deal.end_date is not string and deal.end_date else deal.end_date|default('Soon') %}
+            <div class="deal-card">
+              <div class="toolbar-split">
+                <h3>{{ deal.title|default('Limited offer') }}</h3>
+                {% if already_redeemed %}<span class="status-pill approved">Redeemed</span>{% endif %}
+              </div>
+              <p class="muted">{{ deal.description|default('Deal details coming soon.') }}</p>
+              <div class="business-meta">
+                <span>Starts: {{ deal_start }}</span>
+                <span>Ends: {{ deal_end }}</span>
+              </div>
+              <div class="deal-actions">
+                <form method="POST" action="{{ url_for('deal.redeem_deal', business_id=biz.id|default(0), deal_id=deal.id|default(0)) }}">
+                  <button class="button" type="submit" {% if already_redeemed %}disabled{% endif %}>{{ 'Already redeemed' if already_redeemed else 'Redeem deal' }}</button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="muted">No deals posted for this business yet.</p>
+          {% endif %}
+        </article>
+      </div>
+    </section>
+
+    <section class="section fade-up">
+      <div class="detail-grid detail-grid--reviews">
+        <article class="surface-card review-surface">
+          <div class="toolbar-split review-toolbar-modern">
+            <div>
+              <span class="section-kicker">Community feedback</span>
+              <h2>Reviews</h2>
+            </div>
+            <div class="review-toolbar-controls">
+              <label for="review-sort">Sort</label>
+              <select id="review-sort" name="review-sort">
+                <option value="newest_oldest" selected>Newest to Oldest</option>
+                <option value="oldest_newest">Oldest to Newest</option>
+                <option value="highest_lowest">Highest to Lowest</option>
+                <option value="lowest_highest">Lowest to Highest</option>
+                <option value="likes_desc">Most Liked to Least Liked</option>
+                <option value="likes_asc">Least Liked to Most Liked</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pagination-toolbar" data-review-pagination>
             <button class="button subtle" type="button" data-review-prev>Back</button>
             <span class="muted" data-review-page-indicator>1/1</span>
             <button class="button subtle" type="button" data-review-next>Next</button>
           </div>
-        </div>
-        <div class="review-list" data-review-list>
-          {% for review in review_items %}
-          {% set rating_value = review.rating|int if review.rating is defined else 5 %}
-          {% set can_edit_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
-          {% set can_delete_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
-          {% set review_date = review.created_at.strftime('%m-%d-%Y') if review.created_at is defined and review.created_at and review.created_at is not string else review.created_at|default('Recent') %}
-          {% set review_created_at_raw = review.created_at.isoformat() if review.created_at is defined and review.created_at and review.created_at is not string else review.created_at|default('') %}
-          {% set review_images = review.review_images if review.review_images is defined and review.review_images is not none else [] %}
-          <div class="review-item" data-review-item data-created-at="{{ review_created_at_raw }}" data-rating="{{ rating_value }}" data-order="{{ loop.index0 }}">
-            <div class="row" style="align-items: baseline;">
-              <strong>{{ review.user.username|default('Anonymous') }}</strong>
-              <span class="star-bar" data-rating-bar data-rating="{{ rating_value }}">
-                <span class="base">★★★★★</span>
-                <span class="fill">★★★★★</span>
-              </span>
-              <span class="muted">{{ review_date }}</span>
-              {% if can_edit_review %}
-              <a class="muted" href="{{ url_for('main.edit_review', review_id=review.id|default(0)) }}">Edit review</a>
-              {% endif %}
-              {% if can_delete_review %}
-              <form method=POST action="{{ url_for('main.delete_review', review_id=review.id|default(0)) }}" style="display: inline;">
-                <button class="button danger" type="submit">Delete review</button>
-              </form>
-              {% endif %}
-            </div>
-            <p class="muted" style="margin: 0.25rem 0 0;">{{ review.comment|default('No comment provided.') }}</p>
-            {% if review_images and review_images|length > 0 %}
-            <div class="review-images">
-              {% for image_item in review_images %}
-              {% set image_src = image_item.image_url if image_item.image_url is defined else image_item %}
-              <a href="{{ image_src }}" target="_blank" rel="noopener noreferrer" class="review-image-link">
-                <img src="{{ image_src }}" alt="Review image {{ loop.index }}" class="review-image" loading="lazy">
-              </a>
-              {% endfor %}
-            </div>
-            {% endif %}
-          </div>
-          {% endfor %}
-        </div>
-      </div>
 
-      <div class="card">
-        <h3 style="margin-top: 0;">Leave a review</h3>
-        <form method="POST" action="{{ url_for('main.submit_review', business_id=biz.id|default(0)) }}" enctype="multipart/form-data">
-          <div>
-            <label for="rating">Rating</label>
-            <select id="rating" name="rating" required>
-              <option value="">Select</option>
-              <option value="5">5 - Excellent</option>
-              <option value="4">4 - Good</option>
-              <option value="3">3 - Fair</option>
-              <option value="2">2 - Poor</option>
-              <option value="1">1 - Very poor</option>
-            </select>
+          <div class="review-list" data-review-list>
+            {% for review in review_items %}
+            {% set rating_value = review.rating|int if review.rating is defined else 5 %}
+            {% set can_edit_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
+            {% set can_delete_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
+            {% set review_date = review.created_at.strftime('%m-%d-%Y') if review.created_at is defined and review.created_at and review.created_at is not string else review.created_at|default('Recent') %}
+            {% set review_created_at_raw = review.created_at.isoformat() if review.created_at is defined and review.created_at and review.created_at is not string else review.created_at|default('') %}
+            {% set review_images = review.review_images if review.review_images is defined and review.review_images is not none else [] %}
+            {% set can_manage_visibility = current_user.is_authenticated and current_user.is_admin %}
+            {% set review_is_visible = review.is_visible if review.is_visible is defined else True %}
+            {% set review_likes = review.likes if review.likes is defined and review.likes is not none else [] %}
+            {% set like_count = review_likes|length %}
+            {% set has_liked_review = current_user.is_authenticated and (review_likes | selectattr('user_id', 'equalto', current_user.id) | list | length > 0) %}
+            {% set is_own_review = current_user.is_authenticated and review.user_id|default(None) == current_user.id %}
+            <div class="review-item" data-review-item data-created-at="{{ review_created_at_raw }}" data-rating="{{ rating_value }}" data-likes="{{ like_count }}" data-order="{{ loop.index0 }}">
+              <div class="toolbar-split review-item-head">
+                <div>
+                  <strong>{{ review.user.username|default('Anonymous') }}</strong>
+                  <div class="business-meta">
+                    <span class="star-bar" data-rating-bar data-rating="{{ rating_value }}">
+                      <span class="base">★★★★★</span>
+                      <span class="fill">★★★★★</span>
+                    </span>
+                    <span class="muted">{{ review_date }}</span>
+                    {% if can_manage_visibility and not review_is_visible %}
+                    <span class="status-pill hidden">Hidden</span>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="review-actions">
+                  {% if can_edit_review %}
+                  <a class="button subtle" href="{{ url_for('main.edit_review', review_id=review.id|default(0)) }}">Edit review</a>
+                  {% endif %}
+                  {% if can_manage_visibility %}
+                    {% if review_is_visible %}
+                    <form method="POST" action="{{ url_for('admin.admin_hide_review', review_id=review.id|default(0), next=url_for('main.business_detail', business_id=biz.id|default(0))) }}" class="review-action-form">
+                      <button class="button subtle" type="submit">Hide review</button>
+                    </form>
+                    {% else %}
+                    <form method="POST" action="{{ url_for('admin.admin_show_review', review_id=review.id|default(0), next=url_for('main.business_detail', business_id=biz.id|default(0))) }}" class="review-action-form">
+                      <button class="button subtle" type="submit">Unhide review</button>
+                    </form>
+                    {% endif %}
+                  {% endif %}
+                  {% if can_delete_review %}
+                  <form method="POST" action="{{ url_for('main.delete_review', review_id=review.id|default(0)) }}" class="review-action-form">
+                    <button class="button danger" type="submit">Delete review</button>
+                  </form>
+                  {% endif %}
+                </div>
+              </div>
+              <div class="review-like-row">
+                {% if not is_own_review %}
+                <form method="POST" action="{{ url_for('main.like_review', review_id=review.id|default(0)) }}" class="review-action-form">
+                  <button class="like-button{{ ' is-liked' if has_liked_review else '' }}" type="submit" aria-label="{{ 'Unlike review' if has_liked_review else 'Like review' }}">
+                    <span class="like-button-icon">{{ '♥' if has_liked_review else '♡' }}</span>
+                    <span class="like-button-count">{{ like_count }}</span>
+                  </button>
+                </form>
+                {% else %}
+                <span class="like-button like-button-static" aria-label="Review likes">
+                  <span class="like-button-icon">♥</span>
+                  <span class="like-button-count">{{ like_count }}</span>
+                </span>
+                {% endif %}
+              </div>
+              <p class="muted">{{ review.comment|default('No comment provided.') }}</p>
+              {% if review_images and review_images|length > 0 %}
+              <div class="review-images">
+                {% for image_item in review_images %}
+                {% set image_src = image_item.image_url if image_item.image_url is defined else image_item %}
+                <a href="{{ image_src }}" target="_blank" rel="noopener noreferrer" class="review-image-link">
+                  <img src="{{ image_src }}" alt="Review image {{ loop.index }}" class="review-image" loading="lazy">
+                </a>
+                {% endfor %}
+              </div>
+              {% endif %}
+            </div>
+            {% endfor %}
           </div>
-          <div>
-            <label for="comment">Comment</label>
-            <textarea id="comment" name="comment" rows="3" placeholder="Share a short note (optional)" style="width: 100%; padding: 0.75rem; border-radius: 10px; border: 1px solid var(--border); background: #f9fafb; color: var(--text);"></textarea>
+        </article>
+
+        <article class="surface-card review-form-surface">
+          <div class="section-header modern-header compact-header">
+            <div>
+              <span class="section-kicker">Add feedback</span>
+              <h2>Leave a review</h2>
+              <p>Share a rating, a short note, and optional images.</p>
+            </div>
           </div>
-          <div>
-            <label for="review_images">Add images</label>
-            <input id="review_images" name="review_images" type="file" accept="image/*" multiple>
-            <p class="muted review-upload-help">You can upload one or more images with your review.</p>
-            <div class="review-image-preview" id="review-image-preview" aria-live="polite"></div>
-          </div>
-          <button class="button" type="submit">Submit review</button>
-        </form>
+          <form method="POST" action="{{ url_for('main.submit_review', business_id=biz.id|default(0)) }}" enctype="multipart/form-data" class="form-grid">
+            <div>
+              <label for="rating">Rating</label>
+              <select id="rating" name="rating" required>
+                <option value="">Select</option>
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Good</option>
+                <option value="3">3 - Fair</option>
+                <option value="2">2 - Poor</option>
+                <option value="1">1 - Very poor</option>
+              </select>
+            </div>
+            <div>
+              <label for="comment">Comment</label>
+              <textarea id="comment" name="comment" rows="3" placeholder="Share a short note (optional)"></textarea>
+            </div>
+            <div>
+              <label for="review_images">Add images</label>
+              <input id="review_images" name="review_images" type="file" accept="image/*" multiple>
+              <p class="muted review-upload-help">You can upload one or more images with your review.</p>
+              <div class="review-image-preview" id="review-image-preview" aria-live="polite"></div>
+            </div>
+            <button class="button" type="submit">Submit review</button>
+          </form>
+        </article>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </div>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -239,6 +326,7 @@
     const reviews = Array.from(reviewList.querySelectorAll('[data-review-item]')).map((item) => ({
       element: item,
       rating: parseFloat(item.dataset.rating || '0') || 0,
+      likes: parseInt(item.dataset.likes || '0', 10) || 0,
       timestamp: parseTimestamp(item.dataset.createdAt || ''),
       originalOrder: parseInt(item.dataset.order || '0', 10) || 0
     }));
@@ -252,6 +340,10 @@
           if (b.rating !== a.rating) return b.rating - a.rating;
         } else if (mode === 'lowest_highest') {
           if (a.rating !== b.rating) return a.rating - b.rating;
+        } else if (mode === 'likes_desc') {
+          if (b.likes !== a.likes) return b.likes - a.likes;
+        } else if (mode === 'likes_asc') {
+          if (a.likes !== b.likes) return a.likes - b.likes;
         } else {
           const aHasDate = a.timestamp !== null;
           const bHasDate = b.timestamp !== null;

@@ -2,58 +2,72 @@
 {% block title %}Claim a Business | Byte Business{% endblock %}
 
 {% block content %}
-<div class="container auth-layout">
-  <div class="auth-card">
-    <h1>Claim a business</h1>
-    <p>Share details and we will review your claim for the directory.</p>
-    <form method="POST" action="{{ url_for('main.create_business_request') }}">
-      <div>
-        <label for="business_name">Business name *</label>
-        <input id="business_name" name="business_name" type="text" placeholder="Business name" required>
+<div class="page-shell">
+  <div class="container request-form-layout fade-up">
+    <section class="hero-panel hero-panel-compact">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Business claims</span>
+        <h1>Claim a business</h1>
+        <p>Submit the core business details and the admin team can review the claim for the directory.</p>
       </div>
-      <div>
-        <label for="location">Location *</label>
-        <input id="location" name="location" type="text" placeholder="City, State" required>
-      </div>
-      <div>
-        <label for="address">Address *</label>
-        <input id="address" name="address" type="text" placeholder="123 Main St" required>
-      </div>
-      <div>
-        <label for="category">Category *</label>
-        <select id="category" name="category" required>
-          <option value="">Select a category</option>
-          <option value="Restaurant">Restaurant</option>
-          <option value="Cafe &amp; Bakery">Cafe &amp; Bakery</option>
-          <option value="Bar &amp; Nightlife">Bar &amp; Nightlife</option>
-          <option value="Retail">Retail</option>
-          <option value="Service">Service</option>
-          <option value="Studio">Studio</option>
-          <option value="Fitness">Fitness</option>
-          <option value="Entertainment">Entertainment</option>
-          <option value="Bookstore">Bookstore</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div>
-        <label for="description">Description</label>
-        <textarea id="description" name="description" placeholder="Tell us about the business."></textarea>
-      </div>
-      <div>
-        <label for="website">Website</label>
-        <input id="website" name="website" type="url" placeholder="https://example.com">
-      </div>
-      <div>
-        <label for="contact">Contact</label>
-        <input id="contact" name="contact" type="text" placeholder="Phone or email">
-      </div>
-      <div>
-        <label for="hours">Hours</label>
-        <input id="hours" name="hours" type="text" placeholder="Mon-Fri 9am-5pm">
-      </div>
-      <button class="button" type="submit">Submit request</button>
-    </form>
-    <p class="muted" style="margin-top: 1rem;">Required fields are marked with *.</p>
+    </section>
+
+    <div class="surface-card form-surface">
+      <form method="POST" action="{{ url_for('main.create_business_request') }}" class="form-grid form-grid--two">
+        <div>
+          <label for="business_name">Business name *</label>
+          <input id="business_name" name="business_name" type="text" placeholder="Business name" required>
+        </div>
+        <div>
+          <label for="location">Location *</label>
+          <input id="location" name="location" type="text" placeholder="City, State" required>
+        </div>
+        <div>
+          <label for="address">Address *</label>
+          <input id="address" name="address" type="text" placeholder="123 Main St" required>
+        </div>
+        <div>
+          <label for="category">Category *</label>
+          <select id="category" name="category" required>
+            <option value="">Select a category</option>
+            <option value="Restaurant">Restaurant</option>
+            <option value="Cafe &amp; Bakery">Cafe &amp; Bakery</option>
+            <option value="Bar &amp; Nightlife">Bar &amp; Nightlife</option>
+            <option value="Retail">Retail</option>
+            <option value="Service">Service</option>
+            <option value="Studio">Studio</option>
+            <option value="Fitness">Fitness</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Bookstore">Bookstore</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-span-full">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" placeholder="Tell us about the business."></textarea>
+        </div>
+        <div>
+          <label for="website">Website</label>
+          <input id="website" name="website" type="url" placeholder="https://example.com">
+        </div>
+        <div>
+          <label for="logo_url">Logo URL</label>
+          <input id="logo_url" name="logo_url" type="url" placeholder="https://example.com/logo.png">
+        </div>
+        <div>
+          <label for="contact">Contact</label>
+          <input id="contact" name="contact" type="text" placeholder="Phone or email">
+        </div>
+        <div class="form-span-full">
+          <label for="hours">Hours</label>
+          <input id="hours" name="hours" type="text" placeholder="Mon-Fri 9am-5pm">
+        </div>
+        <div class="form-span-full form-footer-row">
+          <p class="muted form-note">Required fields are marked with *.</p>
+          <button class="button" type="submit">Submit request</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 {% endblock %}

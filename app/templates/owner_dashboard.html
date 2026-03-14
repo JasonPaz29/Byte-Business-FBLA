@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Owner Dashboard | Byte Business{% endblock %}
+
+{% block content %}
+<div class="page-shell owner-page">
+  <div class="container">
+    <section class="hero-panel hero-panel-compact fade-up">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Owner tools</span>
+        <h1>{{ business.name|default('Business') }}</h1>
+        <p>Manage your business details, current deals, and review activity from one place.</p>
+      </div>
+      <div class="page-actions">
+        <a class="button subtle" href="{{ url_for('main.business_detail', business_id=business.id|default(0)) }}">View public page</a>
+      </div>
+    </section>
+
+    <section class="section fade-up">
+      <div class="stats-grid admin-stats-grid">
+        <article class="stats-panel">
+          <span class="stats-label">Category</span>
+          <strong>{{ business.category|default('—') }}</strong>
+          <p>Primary business category.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Location</span>
+          <strong>{{ business.location|default('—') }}</strong>
+          <p>Listed business location.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Reviews</span>
+          <strong>{{ business.reviews|length if business.reviews is not none else 0 }}</strong>
+          <p>Total review count on the business.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Deals</span>
+          <strong>{{ business.deals|length if business.deals is not none else 0 }}</strong>
+          <p>Current deals attached to the business.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section fade-up">
+      <div class="surface-grid surface-grid--3">
+        <article class="surface-card">
+          <span class="section-kicker">Profile</span>
+          <h3>Edit business</h3>
+          <p class="muted">Update the name, address, category, contact information, and description.</p>
+          <a class="button" href="{{ url_for('owner.edit_business', business_id=business.id|default(0)) }}">Edit details</a>
+        </article>
+
+        <article class="surface-card">
+          <span class="section-kicker">Promotions</span>
+          <h3>Manage deals</h3>
+          <p class="muted">Create offers for users and remove deals that should no longer be active.</p>
+          <a class="button" href="{{ url_for('owner.manage_deals', business_id=business.id|default(0)) }}">Open deals</a>
+        </article>
+
+        <article class="surface-card">
+          <span class="section-kicker">Analytics</span>
+          <h3>Business stats</h3>
+          <p class="muted">See review totals and quick business-level activity indicators.</p>
+          <a class="button" href="{{ url_for('owner.business_stats', business_id=business.id|default(0)) }}">View stats</a>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

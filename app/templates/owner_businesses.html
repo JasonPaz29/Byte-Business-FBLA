@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Owned Businesses | Byte Business{% endblock %}
+
+{% block content %}
+<div class="page-shell owner-page">
+  <div class="container">
+    <section class="hero-panel hero-panel-compact fade-up">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Owner tools</span>
+        <h1>Your owned businesses</h1>
+        <p>Open each business dashboard to edit details, manage deals, and review business-level stats.</p>
+      </div>
+      <div class="page-actions">
+        <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Back to businesses</a>
+      </div>
+    </section>
+
+    <section class="section fade-up">
+      {% if businesses and businesses|length > 0 %}
+      <div class="modern-card-grid">
+        {% for biz in businesses %}
+        {% set rating_val = biz.average_rating() if (biz.average_rating is defined and biz.average_rating() is not none) else '—' %}
+        <article class="business-card-modern{{ ' is-inactive' if biz.is_active is defined and not biz.is_active else '' }}">
+          <div class="business-card-top">
+            <div class="business-logo">{{ biz.name[:2]|upper if biz.name else 'BB' }}</div>
+            <div>
+              <h3>{{ biz.name|default('Business') }}</h3>
+              <p>{{ biz.location|default('City, State') }}</p>
+            </div>
+            <span class="rating-pill">{{ rating_val }}{% if rating_val != '—' %} ★{% endif %}</span>
+          </div>
+
+          <div class="chip-row">
+            <span class="metric-chip">{{ biz.category|default('Business') }}</span>
+            <span class="status-pill {{ 'active' if biz.is_active else 'inactive' }}">{{ 'Active' if biz.is_active else 'Inactive' }}</span>
+            <span class="metric-chip accent">{{ biz.deals|length if biz.deals is not none else 0 }} deal{{ '' if (biz.deals|length if biz.deals is not none else 0) == 1 else 's' }}</span>
+          </div>
+
+          <p class="card-summary">{{ biz.description|default('No description has been added yet.') }}</p>
+
+          <div class="card-footer">
+            <span class="review-count">{{ biz.reviews|length if biz.reviews is not none else 0 }} review(s)</span>
+            <div class="review-actions">
+              <a class="button subtle" href="{{ url_for('main.business_detail', business_id=biz.id|default(0)) }}">Public page</a>
+              <a class="button" href="{{ url_for('owner.owner_dashboard', business_id=biz.id|default(0)) }}">Owner dashboard</a>
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state-modern">
+        <h3>No owned businesses</h3>
+        <p class="muted">You do not currently own any businesses linked to your account.</p>
+        <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Browse businesses</a>
+      </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

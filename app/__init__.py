@@ -28,7 +28,7 @@ def create_app():
         }
 
 
-    from . import routes, models, auth_routes, bookmarks, deals, forgot_password_service, admin_routes
+    from . import routes, models, auth_routes, bookmarks, deals, forgot_password_service, admin_routes, owner_routes
     # Register blueprints or routes
     app.register_blueprint(routes.main_bp)
     app.register_blueprint(auth_routes.auth_bp)
@@ -36,6 +36,7 @@ def create_app():
     app.register_blueprint(deals.deal_bp)
     app.register_blueprint(forgot_password_service.fp_bp)
     app.register_blueprint(admin_routes.admin_bp)
+    app.register_blueprint(owner_routes.owner_bp)
 
 
     return app

@@ -5,35 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Byte Business{% endblock %}</title>
   <link rel="icon" type="image/png" href="{{ url_for('static', filename='FBLA-Symbol.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   {% block head %}{% endblock %}
 </head>
 <body>
   <header class="site-header">
-    <div class="container header-inner">
-      <div class="brand">
-        <img class="brand-logo" src="{{ url_for('static', filename='FBLA-Symbol.png') }}" alt="FBLA logo">
-        <span>Byte Business</span>
-      </div>
-      <nav class="nav-links">
+    <div class="container nav-shell">
+      <a class="brand" href="{{ url_for('main.home') }}">
+        <span class="brand-mark" aria-hidden="true">
+          <img src="{{ url_for('static', filename='FBLA-Symbol.png') }}" alt="">
+        </span>
+        <span class="brand-copy">
+          <span class="brand-name">Byte Business</span>
+          <span class="brand-tagline">Local reviews and discovery</span>
+        </span>
+      </a>
+
+      <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="mobile-nav" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="nav-desktop" aria-label="Primary">
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('main.stats') }}">Stats</a>
-        <a href="/businesses">Businesses</a>
-        <a href="{{ url_for('bookmarks.view_bookmarks') }}">Bookmarks</a>
-        <a href="{{ url_for('main.reviews') }}">Reviews</a>
-        <a href="{{ url_for('main.help') }}">Help</a>
-        <div class="nav-right">
-          <span class="nav-user">
-            <span class="nav-user-label">Signed in as</span>
-            <span class="nav-user-name">{{ current_user.username }}</span>
-          </span>
-          <a href="{{ url_for('auth.logout') }}">Logout</a>
+        <a class="nav-link" href="{{ url_for('main.list_businesses') }}">Businesses</a>
+        <a class="nav-link" href="{{ url_for('main.stats') }}">Stats</a>
+        <a class="nav-link" href="{{ url_for('bookmarks.view_bookmarks') }}">Bookmarks</a>
+        <a class="nav-link" href="{{ url_for('main.reviews') }}">Reviews</a>
+        <a class="nav-link" href="{{ url_for('main.help') }}">Help</a>
+        {% if current_user.is_admin %}
+        <a class="nav-link nav-link-accent" href="{{ url_for('admin.admin_dashboard') }}">Admin</a>
+        {% endif %}
+        <div class="nav-user">
+          <span class="nav-user-label">Signed in as</span>
+          <span class="nav-user-name">{{ current_user.username }}</span>
         </div>
+        <a class="button subtle" href="{{ url_for('auth.logout') }}">Logout</a>
         {% else %}
-        <a href="{{ url_for('main.home') }}">Home</a>
-        <a href="/businesses">Businesses</a>
-        <a href="{{ url_for('auth.login') }}">Login</a>
-        <a class="button subtle" href="{{ url_for('auth.register') }}">Register</a>
+        <a class="nav-link" href="{{ url_for('main.home') }}">Home</a>
+        <a class="nav-link" href="{{ url_for('main.list_businesses') }}">Businesses</a>
+        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+        <a class="button" href="{{ url_for('auth.register') }}">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+
+    <div class="container nav-mobile" id="mobile-nav" data-nav-panel hidden>
+      <nav class="mobile-links" aria-label="Mobile primary">
+        {% if current_user.is_authenticated %}
+        <a class="mobile-link" href="{{ url_for('main.list_businesses') }}">Businesses</a>
+        <a class="mobile-link" href="{{ url_for('main.stats') }}">Stats</a>
+        <a class="mobile-link" href="{{ url_for('bookmarks.view_bookmarks') }}">Bookmarks</a>
+        <a class="mobile-link" href="{{ url_for('main.reviews') }}">Reviews</a>
+        <a class="mobile-link" href="{{ url_for('main.help') }}">Help</a>
+        {% if current_user.is_admin %}
+        <a class="mobile-link" href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a>
+        {% endif %}
+        <div class="mobile-user">{{ current_user.username }}</div>
+        <a class="button subtle mobile-button" href="{{ url_for('auth.logout') }}">Logout</a>
+        {% else %}
+        <a class="mobile-link" href="{{ url_for('main.home') }}">Home</a>
+        <a class="mobile-link" href="{{ url_for('main.list_businesses') }}">Businesses</a>
+        <a class="mobile-link" href="{{ url_for('auth.login') }}">Login</a>
+        <a class="button mobile-button" href="{{ url_for('auth.register') }}">Register</a>
         {% endif %}
       </nav>
     </div>
@@ -176,6 +214,16 @@
           const alert = button.closest('.alert');
           if (alert) alert.remove();
         });
+      });
+
+      const navToggle = document.querySelector('[data-nav-toggle]');
+      const navPanel = document.querySelector('[data-nav-panel]');
+      navToggle?.addEventListener('click', () => {
+        const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', String(!isExpanded));
+        if (navPanel) {
+          navPanel.hidden = isExpanded;
+        }
       });
     });
   </script>

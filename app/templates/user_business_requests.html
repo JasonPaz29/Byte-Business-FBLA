@@ -2,84 +2,83 @@
 {% block title %}Your Business Requests | Byte Business{% endblock %}
 
 {% block content %}
-<div class="container">
-  <section class="section">
-    <div class="section-header">
-      <div>
-        <h2>Your Business Requests</h2>
-        <p>Track request status, review time, and admin notes.</p>
+<div class="page-shell">
+  <div class="container">
+    <section class="hero-panel hero-panel-compact fade-up">
+      <div class="hero-panel-copy">
+        <span class="section-kicker">Claim tracking</span>
+        <h1>Your business requests</h1>
+        <p>Track request status, review timing, and any admin notes tied to your submitted claims.</p>
       </div>
-      <a class="button" href="{{ url_for('main.create_business_request') }}">New request</a>
-    </div>
+      <div class="page-actions">
+        <a class="button" href="{{ url_for('main.create_business_request') }}">New request</a>
+      </div>
+    </section>
 
-    {% if requests and requests|length > 0 %}
-      <div class="card-grid">
+    <section class="section fade-up">
+      {% if requests and requests|length > 0 %}
+      <div class="surface-grid surface-grid--2">
         {% for req in requests %}
-          {% set requested_on = req.created_at.strftime('%m-%d-%Y') if req.created_at else '—' %}
-          {% set reviewed_on = req.reviewed_at.strftime('%m-%d-%Y') if req.reviewed_at else 'Not reviewed yet' %}
-          {% set is_reviewed = (not req.is_active) and req.reviewed_at %}
-          {% set is_rejected = is_reviewed and req.reason_declined %}
-          {% set status_label = 'Pending' if req.is_active else ('Rejected' if is_rejected else 'Approved') %}
-          {% set status_style = 'background:#eef1f5;color:#5c6674;' if req.is_active else ('background:#fbe7e7;color:#9c2f2f;' if is_rejected else 'background:#e8f6eb;color:#2f7a40;') %}
-          <article class="card">
-            <div class="row" style="align-items: baseline;">
-              <h3 style="margin: 0;">{{ req.business_name }}</h3>
-              <span class="pill" style="{{ status_style }}">{{ status_label }}</span>
-            </div>
-            <div class="business-meta" style="margin-top: 0.35rem;">
-              <span class="badge">{{ req.category }}</span>
-              <span>{{ req.location }}</span>
-            </div>
-
-            <div class="info-grid" style="margin-top: 0.8rem;">
-              <div class="stat">
-                <span class="muted">Requested</span>
-                <strong>{{ requested_on }}</strong>
-              </div>
-              <div class="stat">
-                <span class="muted">Reviewed</span>
-                <strong>{{ reviewed_on }}</strong>
+        {% set requested_on = req.created_at.strftime('%m-%d-%Y') if req.created_at else '—' %}
+        {% set reviewed_on = req.reviewed_at.strftime('%m-%d-%Y') if req.reviewed_at else 'Not reviewed yet' %}
+        {% set is_reviewed = (not req.is_active) and req.reviewed_at %}
+        {% set is_rejected = is_reviewed and req.reason_declined %}
+        {% set status_label = 'Pending' if req.is_active else ('Rejected' if is_rejected else 'Approved') %}
+        {% set status_class = 'pending' if req.is_active else ('rejected' if is_rejected else 'approved') %}
+        <article class="surface-card request-card-modern">
+          <div class="toolbar-split">
+            <div>
+              <h3>{{ req.business_name }}</h3>
+              <div class="business-meta">
+                <span class="metric-chip">{{ req.category }}</span>
+                <span class="muted">{{ req.location }}</span>
               </div>
             </div>
+            <span class="status-pill {{ status_class }}">{{ status_label }}</span>
+          </div>
 
-            <p class="muted" style="margin: 0.8rem 0 0;">Address: {{ req.address }}</p>
-            {% if req.website %}
-              <p class="muted" style="margin: 0.25rem 0 0;">Website: {{ req.website }}</p>
-            {% endif %}
-            {% if req.contact %}
-              <p class="muted" style="margin: 0.25rem 0 0;">Contact: {{ req.contact }}</p>
-            {% endif %}
-            {% if req.hours %}
-              <p class="muted" style="margin: 0.25rem 0 0;">Hours: {{ req.hours }}</p>
-            {% endif %}
+          <div class="info-grid">
+            <div class="stat">
+              <span class="muted">Requested</span>
+              <strong>{{ requested_on }}</strong>
+            </div>
+            <div class="stat">
+              <span class="muted">Reviewed</span>
+              <strong>{{ reviewed_on }}</strong>
+            </div>
+          </div>
 
-            {% if req.description %}
-              <p class="muted" style="margin: 0.8rem 0 0;">{{ req.description }}</p>
-            {% endif %}
+          <div class="request-meta-list">
+            <p class="muted"><strong>Address:</strong> {{ req.address }}</p>
+            {% if req.website %}<p class="muted"><strong>Website:</strong> {{ req.website }}</p>{% endif %}
+            {% if req.contact %}<p class="muted"><strong>Contact:</strong> {{ req.contact }}</p>{% endif %}
+            {% if req.hours %}<p class="muted"><strong>Hours:</strong> {{ req.hours }}</p>{% endif %}
+          </div>
 
-            {% if req.decision_notes %}
-              <div class="note" style="margin-top: 0.8rem;">
-                <strong>Decision notes:</strong> {{ req.decision_notes }}
-              </div>
-            {% endif %}
+          {% if req.description %}
+          <p class="muted">{{ req.description }}</p>
+          {% endif %}
 
-            {% if is_rejected and req.reason_declined %}
-              <div class="note" style="margin-top: 0.6rem; border-color:#e79a9a;">
-                <strong>Reason declined:</strong> {{ req.reason_declined }}
-              </div>
-            {% elif req.is_active %}
-              <p class="muted" style="margin: 0.8rem 0 0;">Your request is still under review.</p>
-            {% endif %}
-          </article>
+          {% if req.decision_notes %}
+          <div class="note"><strong>Decision notes:</strong> {{ req.decision_notes }}</div>
+          {% endif %}
+
+          {% if is_rejected and req.reason_declined %}
+          <div class="note note-danger"><strong>Reason declined:</strong> {{ req.reason_declined }}</div>
+          {% elif req.is_active %}
+          <p class="muted">Your request is still under review.</p>
+          {% endif %}
+        </article>
         {% endfor %}
       </div>
-    {% else %}
-      <div class="card">
-        <h3 style="margin-top: 0;">No requests yet</h3>
-        <p class="muted">You have not submitted any business requests yet.</p>
+      {% else %}
+      <div class="empty-state-modern">
+        <h3>No requests yet</h3>
+        <p class="muted">You have not submitted a business request yet.</p>
         <a class="button" href="{{ url_for('main.create_business_request') }}">Create your first request</a>
       </div>
-    {% endif %}
-  </section>
+      {% endif %}
+    </section>
+  </div>
 </div>
 {% endblock %}

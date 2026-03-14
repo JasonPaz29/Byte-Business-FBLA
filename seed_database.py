@@ -20,10 +20,18 @@ def seed_businesses_from_csv():
                         description=row['description'],
                         website=row['website'],
                         contact=row['contact'],
-                        hours=row['hours']
+                        hours=row['hours'],
+                        logo_url=row['logo_url']
                     )
                     db.session.add(business)
             db.session.commit()
         print("Database seeded with businesses from CSV.")
+
+def clear_data_from_csv():
+    deleted = Business.query.delete()
+    db.session.commit()
+    print(f"Deleted {deleted} businesses from the database.")
 if __name__ == '__main__':
-    seed_businesses_from_csv()
+    with app.app_context():  
+        clear_data_from_csv()
+        seed_businesses_from_csv()

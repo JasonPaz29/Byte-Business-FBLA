@@ -2,11 +2,12 @@
 {% block title %}Edit Review | Byte Business{% endblock %}
 
 {% block content %}
-<div class="container">
-  <section class="section auth-layout">
+<div class="page-shell">
+  <div class="container auth-layout fade-up">
     <div class="auth-card">
+      <span class="section-kicker">Review management</span>
       <h1>Edit your review</h1>
-      <p class="muted" style="margin-bottom: 1rem;">Update your rating or note for this business.</p>
+      <p>Update your rating or comment for this business.</p>
       <form method="POST" action="{{ url_for('main.edit_review', review_id=review.id|default(0)) }}">
         <div>
           <label for="rating">Rating</label>
@@ -20,12 +21,12 @@
           <label for="comment">Comment</label>
           <textarea id="comment" name="comment" rows="4" required>{{ review.comment|default('') }}</textarea>
         </div>
-        <div class="row" style="justify-content: flex-start; gap: 0.6rem;">
+        <div class="page-actions page-actions--left">
           <button class="button" type="submit">Save changes</button>
           <a class="button subtle" href="{{ url_for('main.business_detail', business_id=review.business_id|default(0)) }}">Cancel</a>
         </div>
       </form>
     </div>
-  </section>
+  </div>
 </div>
 {% endblock %}

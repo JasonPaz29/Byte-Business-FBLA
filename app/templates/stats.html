@@ -2,44 +2,61 @@
 {% block title %}Stats | Byte Business{% endblock %}
 
 {% block content %}
-<div class="container">
-  <section class="section">
-    <div class="section-header">
+<div class="stats-page">
+  <div class="container">
+    <section class="stats-hero fade-up">
       <div>
-        <h2>Platform Stats</h2>
-        <p>General activity totals across Byte Business.</p>
+        <span class="section-kicker">Platform overview</span>
+        <h1>See how Byte Business is growing across reviews, businesses, and community activity.</h1>
+        <p>These numbers give users a quick read on platform activity and help frame trust, momentum, and local engagement at a glance.</p>
       </div>
       <a class="button subtle" href="{{ url_for('main.list_businesses') }}">Back to businesses</a>
-    </div>
+    </section>
 
-    <div class="info-grid">
-      <div class="stat">
-        <span class="muted">Total users</span>
-        <strong>{{ total_users }}</strong>
+    <section class="section fade-up">
+      <div class="stats-grid">
+        <article class="stats-panel">
+          <span class="stats-label">Total users</span>
+          <strong>{{ total_users }}</strong>
+          <p>Registered accounts currently on the platform.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Active businesses</span>
+          <strong>{{ total_businesses }}</strong>
+          <p>Businesses available for browsing and reviews.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Total reviews</span>
+          <strong>{{ total_reviews }}</strong>
+          <p>Community-submitted ratings and comments.</p>
+        </article>
+        <article class="stats-panel">
+          <span class="stats-label">Your reviews</span>
+          <strong>{{ current_user.reviews|length }}</strong>
+          <p>Reviews you have personally contributed.</p>
+        </article>
       </div>
-      <div class="stat">
-        <span class="muted">Total businesses</span>
-        <strong>{{ total_businesses }}</strong>
-      </div>
-      <div class="stat">
-        <span class="muted">Total reviews</span>
-        <strong>{{ total_reviews }}</strong>
-      </div>
-      <div class="stat">
-        <span class="muted">Your reviews</span>
-        <strong>{{ current_user.reviews|length }}</strong>
-      </div>
-    </div>
+    </section>
 
-    <div class="card" style="margin-top: 1rem;">
-      <h3 style="margin-top: 0;">Quick Snapshot</h3>
-      <p class="muted" style="margin: 0.25rem 0 0;">
-        There are currently {{ total_reviews }} total reviews spread across {{ total_businesses }} businesses.
-      </p>
-      <p class="muted" style="margin: 0.35rem 0 0;">
-        Average reviews per business: {{ (total_reviews / total_businesses)|round(1) if total_businesses > 0 else 0 }}.
-      </p>
-    </div>
-  </section>
+    <section class="section fade-up">
+      <div class="stats-story">
+        <article class="card stats-story-card">
+          <h3>Quick Snapshot</h3>
+          <p class="muted">There are currently {{ total_reviews }} total reviews spread across {{ total_businesses }} businesses.</p>
+          <p class="muted">Average reviews per business: {{ (total_reviews / total_businesses)|round(1) if total_businesses > 0 else 0 }}.</p>
+        </article>
+
+        <article class="card stats-story-card">
+          <h3>Why this matters</h3>
+          <p class="muted">A stronger review base gives users more confidence when deciding where to shop, eat, or explore locally.</p>
+          <div class="chip-row">
+            <span class="metric-chip">Community trust</span>
+            <span class="metric-chip accent">Discovery signal</span>
+            <span class="metric-chip">Local growth</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
 </div>
 {% endblock %}
