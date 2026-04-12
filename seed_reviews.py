@@ -64,6 +64,8 @@ def seed_reviews(min_reviews=1, max_reviews=7, chance_of_review=0.85, min_likes=
                     if liker.id != user.id:  # Prevent self-likes
                         like = ReviewLike(user_id=liker.id, review_id=review.id)
                         db.session.add(like)
+                    else:
+                        continue
     db.session.commit()
     print(f"✅ Created {created} new reviews for {len(businesses)} businesses")
 def clear_reviews():

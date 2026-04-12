@@ -28,3 +28,4 @@ def verify_forgot_password_token(token: str, max_age: int = 3600) -> str:
         return email
     except:
         return None
+

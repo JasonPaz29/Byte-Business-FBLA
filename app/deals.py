@@ -2,6 +2,7 @@ from flask import Blueprint, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app.models import Deal, RedeemDeal, Business
 from app import db
+from app.email_service import send_deal_receipt_info
 
 deal_bp = Blueprint('deal', __name__)
 
@@ -24,7 +25,12 @@ def redeem_deal(business_id, deal_id):
     redeem_deal = RedeemDeal(user_id=current_user.id, deal_id=deal_id)
     db.session.add(redeem_deal)
     db.session.commit()
-    flash('Deal redeemed successfully!', 'success')
+    success, message =  send_deal_receipt_info(current_user)
+    if not success:
+        flash(message, "error")
+        
+    flash(f'Deal redeemed successfully! {message}', 'success')
+    
     return redirect(url_for('main.business_detail', business_id=business_id))
 
 def check_if_redeemed(user_id, deal_id) -> bool:

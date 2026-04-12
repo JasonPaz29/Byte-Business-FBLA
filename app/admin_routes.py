@@ -30,7 +30,7 @@ def approve_business_request(request_id):
     notes = request.form.get("notes")
     existing_business = Business.query.filter(
         Business.name.ilike(business_request.business_name),
-        Business.location.ilike(business_request.location)
+        Business.address.ilike(business_request.address)
     ).first()
     if existing_business:
         flash("That business already exists in the directory.", "error")

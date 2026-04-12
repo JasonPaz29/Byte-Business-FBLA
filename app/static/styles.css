@@ -1185,6 +1185,9 @@ a {
   color: #ffffff;
   font-weight: 700;
   box-shadow: 0 14px 26px rgba(15, 76, 129, 0.18);
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .button:hover,
@@ -1212,6 +1215,13 @@ a {
 
 .button.danger {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.button.danger:hover,
+.button.danger:focus-visible,
+.button.danger:active {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  color: #ffffff;
 }
 
 .button:focus-visible,
